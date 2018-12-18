@@ -21,7 +21,7 @@ Ajtarragona\AlfrescoLaravel\AlfrescoLaravelServiceProvider::class,
 
 ## Alias
 
-For a simplier use of this package, register the alias in the alias array in your `config/app.php` file adding:
+For a simpler use of this package, register the alias in the alias array in your `config/app.php` file adding:
 
 ```php
 'Alfresco' => Ajtarragona\AlfrescoLaravel\Models\AlfrescoLaravel::class
