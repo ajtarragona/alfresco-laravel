@@ -111,7 +111,7 @@ class AlfrescoLaravel extends Model
      * Download a file from Alfresco
      * @param  String $id                Id of the file to download
      * @param  String $destinationFolder Folder route where the file will be storaged
-     * @return Boolean                   Result of the download
+     * @return Mixed                     String with the route to the new file or boolean when fails
      */
     public static function download($id, $destinationFolder){
         try {
@@ -153,7 +153,7 @@ class AlfrescoLaravel extends Model
                         $destinationFolder .= '/';
                     }
                     file_put_contents($destinationFolder.$fileData['entry']['name'], $response);
-                    $result = true;
+                    $result = $destinationFolder.$fileData['entry']['name'];
                 } else {
                     $result = false;
                 }
