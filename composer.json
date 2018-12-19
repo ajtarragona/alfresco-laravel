@@ -1,6 +1,7 @@
 {
     "name": "ajtarragona/alfresco-laravel",
     "keywords" : ["laravel5","laravel","alfresco"],
+    "license": "MIT",
     "description": "Integration of Alfresco in Laravel",
     "authors": [
         {
