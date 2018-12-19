@@ -2,9 +2,6 @@
 
 ## Alfresco-Laravel
 
-[![Software License][ico-license]](LICENSE.md)
-[![Total Downloads][ico-downloads]][link-downloads]
-
 Alfresco-Laravel is a package that allows the management of files in a Alfresco via Laravel.
 
 
@@ -103,7 +100,3 @@ Alfresco::download($nodeId, $destinationFolder); //When you want to download a f
 ```
 
 This function will return a boolean indicating the result of the operation.
-
-[ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/ajtarragona/alfresco-laravel.svg?style=flat-square
-[link-downloads]: https://packagist.org/packages/ajtarragona/alfresco-laravel
