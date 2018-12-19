@@ -4,6 +4,7 @@ namespace Ajtarragona\AlfrescoLaravel\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Log;
+use Route;
 
 class AlfrescoLaravel extends Model
 {
