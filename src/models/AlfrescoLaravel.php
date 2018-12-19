@@ -96,6 +96,8 @@ class AlfrescoLaravel extends Model
                                                 'isFolder' => $element['entry']['isFolder']
                                             );
             }
+
+            return $return;
         } catch (Exception $e) {
             Log::error('*****************************************************************************************');
             Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
