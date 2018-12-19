@@ -2,6 +2,10 @@
 
 ## Alfresco-Laravel
 
+[![Latest Version on Packagist][ico-version]][link-packagist]
+[![Software License][ico-license]](LICENSE.md)
+[![Total Downloads][ico-downloads]][link-downloads]
+
 Alfresco-Laravel is a package that allows the management of files in a Alfresco via Laravel.
 
 
@@ -49,3 +53,10 @@ use Alfresco; // At the top of your controller
 ------
 Alfresco::upload($file); //When you want to upload a file, being $file a UploadedFile instance
 ```
+
+[ico-version]: https://img.shields.io/packagist/v/ajtarragona/alfresco-laravel.svg?style=flat-square
+[ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/ajtarragona/alfresco-laravel.svg?style=flat-square
+
+[link-packagist]: https://packagist.org/packages/ajtarragona/alfresco-laravel
+[link-downloads]: https://packagist.org/packages/ajtarragona/alfresco-laravel
