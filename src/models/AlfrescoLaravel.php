@@ -117,7 +117,7 @@ class AlfrescoLaravel extends Model
             $curl = curl_init();
             //Get info
             curl_setopt_array($curl, array(
-                CURLOPT_URL => config('alfresco.host').'alfresco/api/-default-/public/alfresco/versions/1/nodes/'.$node,
+                CURLOPT_URL => config('alfresco.host').'alfresco/api/-default-/public/alfresco/versions/1/nodes/'.$id,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -132,7 +132,7 @@ class AlfrescoLaravel extends Model
             }else{
                 //Download
                 curl_setopt_array($curl, array(
-                    CURLOPT_URL => config('alfresco.host').'alfresco/api/-default-/public/cmis/versions/1.1/atom/content/id?id='.$node,
+                    CURLOPT_URL => config('alfresco.host').'alfresco/api/-default-/public/cmis/versions/1.1/atom/content/id?id='.$id,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_ENCODING => "",
                     CURLOPT_MAXREDIRS => 10,
