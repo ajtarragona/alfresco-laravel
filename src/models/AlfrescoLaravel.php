@@ -62,7 +62,7 @@ class AlfrescoLaravel extends Model
             $return = array();
             //Get current
             curl_setopt_array($curl, array(
-                CURLOPT_URL => config('alfresco.url').'api/-default-/public/alfresco/versions/1/nodes/'.$node,
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$node,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -79,7 +79,7 @@ class AlfrescoLaravel extends Model
             }
             //Get children
             curl_setopt_array($curl, array(
-                CURLOPT_URL => config('alfresco.url').'api/-default-/public/alfresco/versions/1/nodes/'.$node.'/children',
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$node.'/children',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -118,7 +118,7 @@ class AlfrescoLaravel extends Model
             $curl = curl_init();
             //Get info
             curl_setopt_array($curl, array(
-                CURLOPT_URL => config('alfresco.url').'api/-default-/public/alfresco/versions/1/nodes/'.$id,
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$id,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -133,7 +133,7 @@ class AlfrescoLaravel extends Model
             }else{
                 //Download
                 curl_setopt_array($curl, array(
-                    CURLOPT_URL => config('alfresco.url').'api/-default-/public/cmis/versions/1.1/atom/content/id?id='.$id,
+                    CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/cmis/versions/1.1/atom/content/id?id='.$id,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_ENCODING => "",
                     CURLOPT_MAXREDIRS => 10,
@@ -160,6 +160,103 @@ class AlfrescoLaravel extends Model
             }
             curl_close($curl);
             return $result;
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Check if a node exists in the alfresco repository
+     * @param  String  $nodeId Id of the node to search
+     * @return Boolean         Result of the search
+     */
+    public static function existsId($nodeId){
+        try {
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$id,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            $fileData = json_decode($response,true);
+            if(array_key_exists('error', $fileData) || $fileData['entry']['isFolder']){
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Obtains the binary content of a node
+     * @param  String  $nodeId Id of the node to search
+     * @return Mixed           Binary content of the node or boolean
+     */
+    public static function getId($nodeId){
+        try {
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$id.'/content',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            return curl_exec($curl);
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Obtains the metadata of a node
+     * @param  String  $nodeId Id of the node to search
+     * @return Mixed           Array with the metadata of the node or boolean
+     */
+    public static function getMetadataId($nodeId){
+        try {
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$id,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            $fileData = json_decode($response,true);
+            if(array_key_exists('error', $fileData)){
+                return false;
+            } else {
+                if($fileData['entry']['isFolder']){
+                    return $fileData['entry']['properties'];
+                } else {
+                    return array_merge($fileData['entry']['content'],$fileData['entry']['properties']);
+                }
+            }
         } catch (Exception $e) {
             Log::error('*****************************************************************************************');
             Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
