@@ -10,14 +10,24 @@ class AlfrescoLaravel extends Model
 {
     /**
      * Uploads a file into Alfresco folder
-     * @param  Symfony\Component\HttpFoundation\File\UploadedFile $file The file to be uploaded
-     * @return Boolean                                                  Result of the uploading
+     * @param  Mixed   $file The file to be uploaded, it has to be a Symfony\Component\HttpFoundation\File\UploadedFile or Illuminate\Http\File
+     * @return Boolean       Result of the uploading
      */
     public static function upload($file){
         try {
+            if(get_class($file) == 'Illuminate\Http\UploadedFile'){
+                $path = $file->path();
+                $extension = $file->getClientOriginalExtension();
+                $name = $file->getClientOriginalName();
+            } else {
+                $path = $file->path();
+                $extension = $file->extension();
+                $pathPieces = explode(DIRECTORY_SEPARATOR, $path);
+                $name = end($pathPieces);
+            }
             $curl = curl_init();
-            $uploadFile = curl_file_create($file->path(),
-                                            $file->getClientOriginalExtension(),
+            $uploadFile = curl_file_create($path,
+                                            $extension,
                                             $file->getClientOriginalName());
             $query = array(
                             'siteid' => config('alfresco.siteid'),
