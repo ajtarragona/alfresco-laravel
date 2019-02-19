@@ -3,34 +3,45 @@
 namespace Ajtarragona\AlfrescoLaravel\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\File;
 use Log;
 use Route;
+use Illuminate\Http\File;
 
 class AlfrescoLaravel extends Model
 {
     /**
      * Uploads a file into Alfresco folder
-     * @param  Mixed   $file The file to be uploaded, it has to be a Symfony\Component\HttpFoundation\File\UploadedFile, Illuminate\Http\File or the path string
+     * @param  Mixed   $file The file to be uploaded, it has to be a Symfony\Component\HttpFoundation\File\UploadedFile or Illuminate\Http\File
      * @return Boolean       Result of the uploading
      */
-    public static function upload($file){
+    public static function upload($file, $name = ''){
         try {
+            //Path
             if(is_string($file)) {
-                $file = new File($file);
-                $path = $file->path();
-                $extension = $file->extension();
-                $pathPieces = explode(DIRECTORY_SEPARATOR, $path);
-                $name = end($pathPieces);
+                //Check the file exists
+                if(file_exists(public_path().$file)){
+                    //Generate file and obtain data
+                    $file = new File(public_path().$file);
+                    $path = $file->path();
+                    $extension = $file->extension();
+                    if($name == ''){
+                        $pathPieces = explode(DIRECTORY_SEPARATOR, $path);
+                        $name = end($pathPieces);
+                    }
+                } else {
+                    return false;
+                }
             } elseif(get_class($file) == 'Illuminate\Http\UploadedFile') {
                 $path = $file->path();
                 $extension = $file->getClientOriginalExtension();
-                $name = $file->getClientOriginalName();
+                $name = $name == '' ? $file->getClientOriginalName() : $name;
             } else {
                 $path = $file->path();
                 $extension = $file->extension();
-                $pathPieces = explode(DIRECTORY_SEPARATOR, $path);
-                $name = end($pathPieces);
+                if($name == ''){
+                    $pathPieces = explode(DIRECTORY_SEPARATOR, $path);
+                    $name = end($pathPieces);
+                }
             }
             //Check that the name contains the extension
             if(count(explode('.', $name)) < 2){
@@ -38,14 +49,17 @@ class AlfrescoLaravel extends Model
             }
             $name = Alfresco::getUniqueName($name);
             $curl = curl_init();
+            //Prepare file
             $uploadFile = curl_file_create($path,
                                             $extension,
                                             $name);
+            //Prepare other data
             $query = array(
                             'siteid' => config('alfresco.siteid'),
                             'containerid' => config('alfresco.containerid'),
                             'filedata' => $uploadFile
                             );
+            //Upload
             curl_setopt_array($curl, array(
                 CURLOPT_URL => config('alfresco.url').'service/api/upload',
                 CURLOPT_RETURNTRANSFER => true,
@@ -59,8 +73,9 @@ class AlfrescoLaravel extends Model
             ));
             $response = curl_exec($curl);
             curl_close($curl);
+            //Check result
             $result = json_decode($response,true);
-            if($result['status']['code'] === '200'){
+            if($result['status']['code'] === 200){
                 return true;
             } else {
                 return false;
@@ -95,6 +110,7 @@ class AlfrescoLaravel extends Model
             $response = curl_exec($curl);
             $result = json_decode($response,true);
             if(array_key_exists('error', $result)){
+                dd($result);
                 return array();
             }elseif(isset($result['entry']['parentId'])){
                 $return['back'] = $result['entry']['parentId'];
@@ -233,7 +249,7 @@ class AlfrescoLaravel extends Model
             $curl = curl_init();
             //Get info
             curl_setopt_array($curl, array(
-                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$id.'/content',
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$nodeId.'/content',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -260,7 +276,7 @@ class AlfrescoLaravel extends Model
             $curl = curl_init();
             //Get info
             curl_setopt_array($curl, array(
-                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$id,
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$nodeId,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -276,7 +292,11 @@ class AlfrescoLaravel extends Model
                 if($fileData['entry']['isFolder']){
                     return $fileData['entry']['properties'];
                 } else {
-                    return array_merge($fileData['entry']['content'],$fileData['entry']['properties']);
+                    $extraData = array(
+                                    'isFolder' => $fileData['entry']['isFolder'],
+                                    'name' => $fileData['entry']['name']
+                                    );
+                    return array_merge($fileData['entry']['content'],$fileData['entry']['properties'], $extraData);
                 }
             }
         } catch (Exception $e) {
@@ -297,7 +317,7 @@ class AlfrescoLaravel extends Model
             $curl = curl_init();
             //Get info
             curl_setopt_array($curl, array(
-                CURLOPT_URL => config('alfresco.url').'api/-default-/public/alfresco/versions/1/queries/nodes?term='.$term,
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/queries/nodes?term='.$term,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -326,26 +346,81 @@ class AlfrescoLaravel extends Model
      * @return String       Unique name of the file
      */
     public static function getUniqueName($name){
-        $found = false;
-        $count = 0;
-        $pieces = explode('.', $name);
-        $newName = $name;
-        while(!$found){
-            //Search by name
-            $data = AlfrescoLaravel::search($newName);
-            //If it's empty, we found a unique name and stop the while
-            if(empty($data['list']['entries'])){
-                $found = true;
-            } else {
-                $count++;
-                $newName = $pieces[0].'_'.$count;
-                //We add the other pieces, in a for because image.png has 2 pieces but view.blade.php has 3
-                for ($i=1; $i < count($pieces); $i++) { 
-                    $newName .= '.'.$pieces[$i];
+        try {
+            $found = false;
+            $count = 0;
+            $pieces = explode('.', $name);
+            $newName = $name;
+            while(!$found){
+                $data = AlfrescoLaravel::search($newName);
+                if(empty($data['list']['entries'])){
+                    $found = true;
+                } else {
+                    $count++;
+                    $newName = $pieces[0].'_'.$count;
+                    //We add the other pieces, in a for because image.png has 2 pieces but view.blade.php has 3
+                    for ($i=1; $i < count($pieces); $i++) { 
+                        $newName .= '.'.$pieces[$i];
+                    }
                 }
             }
-        }
 
-        return $newName;
+            return $newName;
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Copies a node to a new location
+     * @param  String  $nodeId        Id of the node to copy
+     * @param  String  $destinationId Id of the node where the new node will be created
+     * @param  String  $newName       Name of the new node (optional)
+     * @return Boolean                Result of the copy
+     */
+    public static function copy($nodeId, $destinationId, $newName = ''){
+        try {
+            $params = array(
+                'targetParentId' => $destinationId
+            );
+            if($newName != ''){
+                $newName = AlfrescoLaravel::getUniqueName($newName);
+                $originalData = AlfrescoLaravel::getMetadataId($nodeId);
+                if(!$originalData['isFolder'] && count(explode('.', $newName)) < 2){
+                    //Add extension
+                    $pieces = explode('.', $originalData['name']);
+                    $newName .= '.'.end($pieces);
+                }
+                $params['name'] = $newName;
+            }
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$nodeId.'/copy',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => json_encode($params),
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            $data = json_decode($response,true);
+            if(array_key_exists('error', $data)){
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
     }
 }
