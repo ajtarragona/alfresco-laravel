@@ -3,6 +3,7 @@
 namespace Ajtarragona\AlfrescoLaravel\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\File;
 use Log;
 use Route;
 
@@ -10,12 +11,18 @@ class AlfrescoLaravel extends Model
 {
     /**
      * Uploads a file into Alfresco folder
-     * @param  Mixed   $file The file to be uploaded, it has to be a Symfony\Component\HttpFoundation\File\UploadedFile or Illuminate\Http\File
+     * @param  Mixed   $file The file to be uploaded, it has to be a Symfony\Component\HttpFoundation\File\UploadedFile, Illuminate\Http\File or the path string
      * @return Boolean       Result of the uploading
      */
     public static function upload($file){
         try {
-            if(get_class($file) == 'Illuminate\Http\UploadedFile'){
+            if(is_string($file)) {
+                $file = new File($file);
+                $path = $file->path();
+                $extension = $file->extension();
+                $pathPieces = explode(DIRECTORY_SEPARATOR, $path);
+                $name = end($pathPieces);
+            } elseif(get_class($file) == 'Illuminate\Http\UploadedFile') {
                 $path = $file->path();
                 $extension = $file->getClientOriginalExtension();
                 $name = $file->getClientOriginalName();
@@ -25,10 +32,15 @@ class AlfrescoLaravel extends Model
                 $pathPieces = explode(DIRECTORY_SEPARATOR, $path);
                 $name = end($pathPieces);
             }
+            //Check that the name contains the extension
+            if(count(explode('.', $name)) < 2){
+                $name .= '.'.$extension;            
+            }
+            $name = Alfresco::getUniqueName($name);
             $curl = curl_init();
             $uploadFile = curl_file_create($path,
                                             $extension,
-                                            $file->getClientOriginalName());
+                                            $name);
             $query = array(
                             'siteid' => config('alfresco.siteid'),
                             'containerid' => config('alfresco.containerid'),
@@ -273,5 +285,67 @@ class AlfrescoLaravel extends Model
             Log::error('*****************************************************************************************');
             return false;
         }
+    }
+
+    /**
+     * Search a node by his name
+     * @param  String $term Name of the node to search
+     * @return Mixed        Array with the result of the search or boolean
+     */
+    public static function search($term){
+        try {
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/-default-/public/alfresco/versions/1/queries/nodes?term='.$term,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            $data = json_decode($response,true);
+            if(array_key_exists('error', $data)){
+                return false;
+            } else {
+                return $data;
+            }
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Find a unique name for a file
+     * @param  String $name Original name of the file
+     * @return String       Unique name of the file
+     */
+    public static function getUniqueName($name){
+        $found = false;
+        $count = 0;
+        $pieces = explode('.', $name);
+        $newName = $name;
+        while(!$found){
+            //Search by name
+            $data = AlfrescoLaravel::search($newName);
+            //If it's empty, we found a unique name and stop the while
+            if(empty($data['list']['entries'])){
+                $found = true;
+            } else {
+                $count++;
+                $newName = $pieces[0].'_'.$count;
+                //We add the other pieces, in a for because image.png has 2 pieces but view.blade.php has 3
+                for ($i=1; $i < count($pieces); $i++) { 
+                    $newName .= '.'.$pieces[$i];
+                }
+            }
+        }
+
+        return $newName;
     }
 }
