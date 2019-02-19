@@ -47,7 +47,7 @@ class AlfrescoLaravel extends Model
             if(count(explode('.', $name)) < 2){
                 $name .= '.'.$extension;            
             }
-            $name = Alfresco::getUniqueName($name);
+            $name = AlfrescoLaravel::getUniqueName($name);
             $curl = curl_init();
             //Prepare file
             $uploadFile = curl_file_create($path,
@@ -110,7 +110,6 @@ class AlfrescoLaravel extends Model
             $response = curl_exec($curl);
             $result = json_decode($response,true);
             if(array_key_exists('error', $result)){
-                dd($result);
                 return array();
             }elseif(isset($result['entry']['parentId'])){
                 $return['back'] = $result['entry']['parentId'];
@@ -350,7 +349,7 @@ class AlfrescoLaravel extends Model
             $found = false;
             $count = 0;
             $pieces = explode('.', $name);
-            $newName = $name;
+            $newName = AlfrescoLaravel::sanitizeName($name);
             while(!$found){
                 $data = AlfrescoLaravel::search($newName);
                 if(empty($data['list']['entries'])){
@@ -422,5 +421,64 @@ class AlfrescoLaravel extends Model
             Log::error('*****************************************************************************************');
             return false;
         }
+    }
+
+    /**
+     * Move a node to a new location
+     * @param  String  $nodeId        Id of the node to move
+     * @param  String  $destinationId Id of the node where the original node will be moved
+     * @param  String  $newName       New name of the node (optional)
+     * @return Boolean                Result of the movement
+     */
+    public static function move($nodeId, $destinationId, $newName = ''){
+        try {
+            $params = array(
+                'targetParentId' => $destinationId
+            );
+            if($newName != ''){
+                $newName = AlfrescoLaravel::getUniqueName($newName);
+                $originalData = AlfrescoLaravel::getMetadataId($nodeId);
+                if(!$originalData['isFolder'] && count(explode('.', $newName)) < 2){
+                    //Add extension
+                    $pieces = explode('.', $originalData['name']);
+                    $newName .= '.'.end($pieces);
+                }
+                $params['name'] = $newName;
+            }
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$nodeId.'/move',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => json_encode($params),
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            $data = json_decode($response,true);
+            if(array_key_exists('error', $data)){
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Clear the name of a node to prevent errors
+     * @param  String $name Name of the node
+     * @return String       Sanitized name
+     */
+    private static function sanitizeName($name){
+        return str_replace(' ', '_', $name);
     }
 }
