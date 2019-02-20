@@ -7,7 +7,7 @@ return [
 		'api' => '', //CMIS API
 		'repository_id' => '-default-', //Repository where the files will we uploaded
 		'siteid' => 'swsdp', //Site where the files will we uploaded
-		'containerid' => 'uploads', //Folder where the files will we uploaded, must already exist in the site
+		'containerid' => '12345678-1234-1234-1234-12345678900', //Folder where the files will we uploaded, must already exist in the site
 		'user' => 'admin', //Username to acces alfresco
 		'pass' => 'admin' //Password to access alfresco
 	];

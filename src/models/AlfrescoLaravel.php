@@ -11,7 +11,7 @@ class AlfrescoLaravel
 {
     /**
      * Uploads a file into Alfresco folder
-     * @param  Mixed   $file The file to be uploaded, it has to be a Symfony\Component\HttpFoundation\File\UploadedFile or Illuminate\Http\File
+     * @param  Mixed   $file The file to be uploaded, it has to be a Symfony\Component\HttpFoundation\File\UploadedFile, Illuminate\Http\File or a String
      * @return Boolean       Result of the uploading
      */
     public static function upload($file, $name = '', $containerName = ''){
@@ -83,7 +83,8 @@ class AlfrescoLaravel
             //Check result
             $result = json_decode($response,true);
             if($result['status']['code'] === 200){
-                return true;
+                $pieces = explode('/', $result['nodeRef']);
+                return end($pieces);
             } else {
                 return false;
             }
@@ -351,7 +352,7 @@ class AlfrescoLaravel
      * @param  String $name Original name of the file
      * @return String       Unique name of the file
      */
-    public static function getUniqueName($name){
+    private static function getUniqueName($name){
         try {
             $found = false;
             $count = 0;
@@ -388,19 +389,21 @@ class AlfrescoLaravel
      */
     public static function copy($nodeId, $destinationId, $newName = ''){
         try {
-            $params = array(
-                'targetParentId' => $destinationId
-            );
+            $originalData = AlfrescoLaravel::getMetadataId($nodeId);
             if($newName != ''){
                 $newName = AlfrescoLaravel::getUniqueName($newName);
-                $originalData = AlfrescoLaravel::getMetadataId($nodeId);
                 if(!$originalData['isFolder'] && count(explode('.', $newName)) < 2){
                     //Add extension
                     $pieces = explode('.', $originalData['name']);
                     $newName .= '.'.end($pieces);
                 }
-                $params['name'] = $newName;
+            } else {
+                $newName = AlfrescoLaravel::getUniqueName($originalData['name']);
             }
+            $params = array(
+                'targetParentId' => $destinationId,
+                'name'           => $newName
+            );
             $curl = curl_init();
             //Get info
             curl_setopt_array($curl, array(
@@ -419,7 +422,7 @@ class AlfrescoLaravel
             if(!is_array($data) || array_key_exists('error', $data)){
                 return false;
             } else {
-                return true;
+                return $data['entry']['id'];
             }
         } catch (Exception $e) {
             Log::error('*****************************************************************************************');
@@ -521,7 +524,7 @@ class AlfrescoLaravel
      * Create a folder
      * @param  String  $name     Name of the new folder
      * @param  String  $parentId Id of the parent folder, if none is supplied, the default folder will be user
-     * @return Boolean           Result of the creation
+     * @return Mixed             Id of the new folder or boolean
      */
     public static function createFolder($name, $parentId = null){
         try {
@@ -543,6 +546,49 @@ class AlfrescoLaravel
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => "POST",
                 CURLOPT_POSTFIELDS => json_encode($folderData),
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            $data = json_decode($response,true);
+            if(!is_array($data) || array_key_exists('error', $data)){
+                return false;
+            } else {
+                return $data['entry']['id'];
+            }
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Update the content of a node
+     * @param  String $nodeId Id of the node to be updated
+     * @param  Mixed  $file   The file to extract the new content, it has to be a Symfony\Component\HttpFoundation\File\UploadedFile, Illuminate\Http\File or a String
+     * @return Boolean        Result of the update
+     */
+    public static function put($nodeId, $file){
+        try {
+            //Get content
+            if(is_string($file)) {
+                $content = file_get_contents(public_path().$file);
+            } else {
+                $path = $file->path();
+                $content = file_get_contents($path);
+            }
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$nodeId.'/content',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "PUT",
+                CURLOPT_POSTFIELDS => $content,
                 CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
             ));
             $response = curl_exec($curl);
