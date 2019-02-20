@@ -180,7 +180,7 @@ class AlfrescoLaravel extends Model
                 ));
                 $response = curl_exec($curl);
                 $info = curl_getinfo($curl);
-                if($info['http_code'] == '200'){
+                if($info['http_code'] == 200){
                     //Check if the folder exists
                     if (!is_dir($destinationFolder)) {                                
                        mkdir($destinationFolder, 0755, true);
@@ -461,6 +461,44 @@ class AlfrescoLaravel extends Model
             $response = curl_exec($curl);
             $data = json_decode($response,true);
             if(array_key_exists('error', $data)){
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Deletes a node, if it's a folder, it also delete the contents
+     * @param  String  $nodeId    Id of the node to delete
+     * @param  Boolean $permanent Indicates if the delete is permanent or we send it to the trascan
+     * @return Boolean            Result of the deletion
+     */
+    public static function delete($nodeId, $permanent = false){
+        try {
+
+            $permanent ? 'true' : 'false';
+
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/alfresco/versions/1/nodes/'.$nodeId.'?permanent='.$permanent,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "DELETE",
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            $data = json_decode($response,true);
+            if(is_array($data) && array_key_exists('error', $data)){
                 return false;
             } else {
                 return true;
