@@ -16,7 +16,6 @@ class AlfrescoLaravel
         if(config('alfresco.use_rest')){
             return AlfrescoLaravel::uploadRest($file, $containerId, $name);
         } else {
-            return 'Not available';
             return AlfrescoLaravel::uploadCMIS($file, $containerId, $name);
         }
     }
@@ -55,11 +54,11 @@ class AlfrescoLaravel
             return AlfrescoLaravel::getMetadataIdCMIS($nodeId);
         }
     }
-    public static function search ($term){
+    public static function search ($term, $strict = false){
         if(config('alfresco.use_rest')){
             return AlfrescoLaravel::searchRest($term);
         } else {
-            return AlfrescoLaravel::searchCMIS($term);
+            return AlfrescoLaravel::searchCMIS($term, $strict);
         }
     }
     public static function getUniqueName ($name){
@@ -73,7 +72,6 @@ class AlfrescoLaravel
         if(config('alfresco.use_rest')){
             return AlfrescoLaravel::copyRest($nodeId, $destinationId, $newName);
         } else {
-            return 'Not available';
             return AlfrescoLaravel::copyCMIS($nodeId, $destinationId, $newName);
         }
     }
@@ -81,7 +79,6 @@ class AlfrescoLaravel
         if(config('alfresco.use_rest')){
             return AlfrescoLaravel::moveRest($nodeId, $destinationId, $newName);
         } else {
-            return 'Not available';
             return AlfrescoLaravel::moveCMIS($nodeId, $destinationId, $newName);
         }
     }
@@ -89,15 +86,13 @@ class AlfrescoLaravel
         if(config('alfresco.use_rest')){
             return AlfrescoLaravel::deleteRest($nodeId, $permanent);
         } else {
-            return 'Not available';
-            return AlfrescoLaravel::deleteCMIS($nodeId, $permanent);
+            return AlfrescoLaravel::deleteCMIS($nodeId);
         }
     }
     public static function createFolder ($name, $parentId = null){
         if(config('alfresco.use_rest')){
             return AlfrescoLaravel::createFolderRest($name, $parentId);
         } else {
-            return 'Not available';
             return AlfrescoLaravel::createFolderCMIS($name, $parentId);
         }
     }
@@ -105,7 +100,6 @@ class AlfrescoLaravel
         if(config('alfresco.use_rest')){
             return AlfrescoLaravel::putRest($nodeId, $file);
         } else {
-            return 'Not available';
             return AlfrescoLaravel::putCMIS($nodeId, $file);
         }
     }
@@ -504,7 +498,7 @@ class AlfrescoLaravel
             $newName = AlfrescoLaravel::sanitizeName($name);
             $pieces = explode('.', $newName);
             while(!$found){
-                $data = AlfrescoLaravel::search($newName);
+                $data = AlfrescoLaravel::search($newName, true);
                 if(empty($data['list']['entries'])){
                     $found = true;
                 } else {
@@ -718,7 +712,18 @@ class AlfrescoLaravel
         try {
             //Get content
             if(is_string($file)) {
-                $content = file_get_contents(public_path().$file);
+                if(strpos($file, public_path()) !== 0){
+                    if(substr($file, 1,1) != DIRECTORY_SEPARATOR){
+                        $file = public_path().DIRECTORY_SEPARATOR.$file;
+                    } else {
+                        $file = public_path().$file;
+                    }
+                }
+                if(file_exists($file)){
+                    $content = file_get_contents($file);
+                } else {
+                    return false;
+                }
             } else {
                 $path = $file->path();
                 $content = file_get_contents($path);
@@ -807,9 +812,6 @@ class AlfrescoLaravel
                 $name .= '.'.$extension;            
             }
             $name = AlfrescoLaravel::getUniqueName($name);
-            $uploadFile = curl_file_create($path,
-                                            $extension,
-                                            $name);
 
             //Prepare data
             $query = array(
@@ -821,12 +823,10 @@ class AlfrescoLaravel
                         'propertyValue' => array(
                                                 0 => 'cmis:document',
                                                 1 => $name,
-                                            ),
-                        'contentStream' => file_get_contents($path)
+                                            )
                         );
-            //Upload
+            //Create document
             $curl = curl_init();
-            
             curl_setopt_array($curl, array(
                 CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/cmis/versions/1.1/browser?objectId='.$containerId,
                 CURLOPT_RETURNTRANSFER => true,
@@ -841,12 +841,19 @@ class AlfrescoLaravel
             $response = curl_exec($curl);
             //Check result
             $result = json_decode($response,true);
-            dd($response);
             if(!is_array($result) || isset($result['exception'])){
                 return false;
             } else {
                 $pieces = explode('/', $result['properties']['alfcmis:nodeRef']['value']);
-                return end($pieces);
+                $newNodeId = end($pieces);
+                //Upload Content
+                if(AlfrescoLaravel::put($newNodeId,$file)){
+                    return $newNodeId;
+                } else {
+                    //If the upload fails, delete the new node
+                    AlfrescoLaravel::delete($newNodeId);
+                    return false;
+                }
             }
         } catch (Exception $e) {
             Log::error('*****************************************************************************************');
@@ -1075,14 +1082,18 @@ class AlfrescoLaravel
 
     /**
      * Search a node by his name
-     * @param  String $term Name of the node to search
-     * @return Mixed        Array with the result of the search or boolean
+     * @param  String  $term   Name of the node to search
+     * @param  Boolean $strict Indicates if we are looking for the exact term
+     * @return Mixed           Array with the result of the search or boolean
      */
-    private static function searchCMIS($term){
+    private static function searchCMIS($term, $strict){
         try {
+            if(!$strict){
+                $term = '%'.$term.'%';
+            }
             $curl = curl_init();
             //Get info
-            $query = urlencode("select * from cmis:document where cmis:name='".$term."'");
+            $query = urlencode("select * from cmis:document where cmis:name LIKE '".$term."'");
             curl_setopt_array($curl, array(
                 CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/cmis/versions/1.1/browser/?cmisselector=query&q='.$query,
                 CURLOPT_RETURNTRANSFER => true,
@@ -1167,6 +1178,183 @@ class AlfrescoLaravel
                 }
             }
             return $result;
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Move a node to a new location
+     * @param  String  $nodeId        Id of the node to move
+     * @param  String  $destinationId Id of the node where the original node will be moved
+     * @param  String  $newName       New name of the node (optional)
+     * @return String                 Id of the new node
+     */
+    private static function moveCMIS($nodeId, $destinationId, $newName = ''){
+        try {
+            //We copy the new file
+            $newId = AlfrescoLaravel::copy($nodeId, $destinationId, $newName);
+            if($newId){
+                //If the copy is successfull, delete the old document
+                AlfrescoLaravel::delete($nodeId);
+                return $newId;
+            } else {
+                return false;
+            }
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Deletes a document
+     * @param  String  $nodeId    Id of the node to delete
+     * @return Boolean            Result of the deletion
+     */
+    private static function deleteCMIS($nodeId){
+        try {
+
+            $params = array(
+                            'cmisaction' => 'delete',
+                            'objectId' => $nodeId
+                            );
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/cmis/versions/1.1/browser/root',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => urldecode(http_build_query($params)),
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            $data = json_decode($response,true);
+            $info = curl_getinfo($curl);
+            if(is_array($data) && $info['http_code'] != 200){
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Create a folder
+     * @param  String  $name     Name of the new folder
+     * @param  String  $parentId Id of the parent folder, if none is supplied, the default folder will be user
+     * @return Mixed             Id of the new folder or boolean
+     */
+    private static function createFolderCMIS($name, $parentId = null){
+        try {
+            //Prepare data
+            $query = array(
+                        'cmisaction' => 'createFolder',
+                        'propertyId' => array(
+                                            0 => 'cmis:objectTypeId',
+                                            1 => 'cmis:name',
+                                        ),
+                        'propertyValue' => array(
+                                                0 => 'cmis:folder',
+                                                1 => $name,
+                                            )
+                        );
+            //Create document
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/cmis/versions/1.1/browser/root?objectId='.$parentId,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => urldecode(http_build_query($query)),
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            //Check result
+            $result = json_decode($response,true);
+            if(!is_array($result) || isset($result['exception'])){
+                return false;
+            } else {
+                $pieces = explode('/', $result['properties']['alfcmis:nodeRef']['value']);
+                return end($pieces);
+            }
+        } catch (Exception $e) {
+            Log::error('*****************************************************************************************');
+            Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
+            Log::error('*****************************************************************************************');
+            return false;
+        }
+    }
+
+    /**
+     * Update the content of a node
+     * @param  String $nodeId Id of the node to be updated
+     * @param  Mixed  $file   The file to extract the new content, it has to be a Symfony\Component\HttpFoundation\File\UploadedFile, Illuminate\Http\File or a String
+     * @return Boolean        Result of the update
+     */
+    private static function putCMIS($nodeId, $file){
+        try {
+
+            //Get content
+            if(is_string($file)) {
+                if(strpos($file, public_path()) !== 0){
+                    if(substr($file, 1,1) != DIRECTORY_SEPARATOR){
+                        $file = public_path().DIRECTORY_SEPARATOR.$file;
+                    } else {
+                        $file = public_path().$file;
+                    }
+                }
+                if(file_exists($file)){
+                    $content = file_get_contents($file);
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    $mime = finfo_file($finfo, $file);
+                } else {
+                    return false;
+                }
+            } else {
+                $path = $file->path();
+                $content = file_get_contents($path);
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime = finfo_file($finfo, $path);
+            }
+            $curl = curl_init();
+            //Get info
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/cmis/versions/1.1/atom/content?id='.$nodeId,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_HTTPHEADER => array('Content-Type:'.$mime),
+                CURLOPT_CUSTOMREQUEST => "PUT",
+                CURLOPT_POSTFIELDS => $content,
+                CURLOPT_USERPWD => config('alfresco.user').':'.config('alfresco.pass')
+            ));
+            $response = curl_exec($curl);
+            $info = curl_getinfo($curl);
+            if($info['http_code'] != 201){
+                return false;
+            } else {
+                return true;
+            }
         } catch (Exception $e) {
             Log::error('*****************************************************************************************');
             Log::error('Error: '.$e->getMessage().' ******* In '.Route::currentRouteAction());
