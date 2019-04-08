@@ -7,15 +7,32 @@
         {
             "name": "Ruben Macias",
             "email": "ruben.macias@studiogenesis.es"
+        },
+        {
+            "name": "Txomin Medrano",
+            "email": "tmedrano@tarragona.cat"
         }
     ],
     "minimum-stability": "dev",
     "require": {
-        "php" : ">=7.0.0"
+        "php" : ">=7.0.0",
+        "guzzlehttp/guzzle": "~6.0"
+
     },
     "autoload": {
         "psr-4": {
             "Ajtarragona\\AlfrescoLaravel\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ajtarragona\\AlfrescoLaravel\\AlfrescoLaravelServiceProvider"
+            ],
+            "aliases": {
+                "AccedeTercers" : "Ajtarragona\\AlfrescoLaravel\\Facades\\Alfresco"
+        
+            }
         }
     }
 }

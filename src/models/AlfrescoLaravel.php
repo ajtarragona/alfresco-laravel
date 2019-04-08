@@ -9,9 +9,11 @@ use Illuminate\Http\File;
 
 class AlfrescoLaravel
 {
+
+    
     /**
      * Functions by config
-     */
+    */
     public static function upload ($file, $containerId = '', $name = ''){
         if(config('alfresco.use_rest')){
             return AlfrescoLaravel::uploadRest($file, $containerId, $name);
@@ -932,6 +934,9 @@ class AlfrescoLaravel
             $curl = curl_init();
             $return = array();
             //Get parent
+            dump(config('alfresco'));
+            dump(config('alfresco.url'));
+            dd(config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/cmis/versions/1.1/atom/id?id='.$node);
             curl_setopt_array($curl, array(
                 CURLOPT_URL => config('alfresco.url').'api/'.config('alfresco.repository_id').'/public/cmis/versions/1.1/atom/id?id='.$node,
                 CURLOPT_RETURNTRANSFER => true,
