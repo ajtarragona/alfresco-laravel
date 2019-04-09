@@ -13,6 +13,9 @@ use Ajtarragona\AlfrescoLaravel\Exceptions\AlfrescoObjectNotFoundException;
 use Ajtarragona\AlfrescoLaravel\Exceptions\AlfrescoObjectAlreadyExistsException;
 use Ajtarragona\AlfrescoLaravel\Models\Helpers\AlfrescoHelper;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+
 use Log;
 use Exception;
 
@@ -22,6 +25,10 @@ class AlfrescoRestProvider
     const REPEATED_RENAME = "rename";
     const REPEATED_OVERWRITE = "overwrite";
     const REPEATED_DENY = "deny" ;    
+    
+    const PAGINATION_ITEMS = 100;    
+
+    //TODO view pagination
 
 
 	
@@ -47,10 +54,11 @@ class AlfrescoRestProvider
 			$settings=to_object($settings);
 		}
 		
-		$this->rootpath=$settings->base_path;
-		if(!ends_with($this->rootpath,"/")) $this->rootpath.="/";
+		// $this->rootpath=$settings->base_path;
+		// if(!ends_with($this->rootpath,"/")) $this->rootpath.="/";
 		
-		
+		$this->baseid=$settings->base_id;
+
 		$this->basepath= "";
 
 		$this->alfrescourl = $settings->url;
@@ -69,6 +77,7 @@ class AlfrescoRestProvider
 
 		
 		$this->connect();
+		$this->rootpath =  $this->getBasepath(true);
 	}
 
 
@@ -80,7 +89,8 @@ class AlfrescoRestProvider
 	private function connect(){ // throws AlfrescoConnectionException {
 		try{
 			$apiurl=$this->generateApiUrl();
-			
+			$this->client= new Client();
+
 			//TODO
 
 			if($this->debug) Log::debug("ALFRESCO: Connecting to Rest API:" .$apiurl);
@@ -95,23 +105,84 @@ class AlfrescoRestProvider
 	}
 
 
-	private function checkInBaseFolder($object){
-		if(!starts_with($object->path, $this->getBasepath(true))){ 
-			return true;
-		}else {
-			throw new AlfrescoObjectNotFoundException(__("Object :name doesn't belong to the current site",["name"=>$object->id]));
-		}
+
+
+	protected function call($method, $url, $params=[],$json=[],$body=false){
+		$args=[
+			'auth' => [$this->apiuser, $this->apipwd],
+		];
+		$args['query'] = ['include'=>'path'];
+
+		$args['query'] = array_merge($args['query'],$params);
 		
+		if($json) $args['json']=$json;
+		if($body) $args['body']=$body;
+		
+
+
+		if($this->debug) Log::debug("ALFRESCO: Calling $method to url:" .$this->generateApiUrl().$url);
+		if($this->debug && isset($args["query"])) Log::debug("ALFRESCO: Calling query:" .http_build_query($args["query"]));
+		if($this->debug && isset($args["json"])) Log::debug("ALFRESCO: Json data:" .http_build_query($args["json"]));
+		
+			
+		// dump("calling $method:".$this->generateApiUrl().$url);
+		// dump($args);
+		$ret=false;
+
+		//try{
+		$response = $this->client->request($method,$this->generateApiUrl().$url, $args);
+		// dump($response->getStatusCode());
+		// dump($response);
+		// dump((string)$response->getBody());
+
+		if($response->getStatusCode()==404){
+			throw new AlfrescoObjectNotFoundException(__("Object not found in Alfresco"));
+		}else if(in_array($response->getStatusCode(), [200,201,204])){
+			$ret = (string) $response->getBody();
+			//dump($ret);
+			if(isJson($ret)){
+				$ret=json_decode($ret);
+			}else if($ret){
+				return $ret;
+			}else{
+				return true;
+			}
+		}
+		return $ret;
+		// } catch (RequestException $e) {
+		//    	//dd($e->getMessage());
+		//    	if()
+		//    	return $ret;
+		// }
+		
+    }
+
+
+	// private function checkInBaseFolder($object){
+	// 	if(!starts_with($object->path, $this->getBasepath(true))){ 
+	// 		return true;
+	// 	}else {
+	// 		throw new AlfrescoObjectNotFoundException(__("Object :name doesn't belong to the current site",["name"=>$object->id]));
+	// 	}
+		
+	// }
+	
+	
+	public function getRootPath(){
+		return $this->rootpath;
 	}
-	
-	
 	
 /**
 	 * Retorna el directori arrel des del qual s'executaran els altres mètodes 
 	 * @return String
 	 */
 	public function getBasepath($full=false){
-		return ($full?($this->rootpath):"") . $this->basepath;
+		if($full){
+			$folder=$this->getBaseFolder();
+			return $folder->fullpath.($this->basepath?"/".$this->basepath:'');
+		}else{
+			return $this->basepath;
+		}
 	}
 	
 
@@ -142,13 +213,8 @@ class AlfrescoRestProvider
 	 * @throws AlfrescoObjectNotFoundException
 	 */
 	public function getBaseFolder(){ // throws AlfrescoObjectNotFoundException{
-		try{
-			
-			//TODO
+		return $this->getObject($this->baseid);
 
-		}catch(Exception $e){
-			throw new AlfrescoObjectNotFoundException(__("Folder [:name] not found in Alfresco", ["name"=>$this->basepath]) );
-		}
 	}
 
 
@@ -159,17 +225,24 @@ class AlfrescoRestProvider
 	 * @return
 	 */
 	protected function fromRestObject($o){
-		
+		//dump($o);
+		if($o->entry->isFile){
+			return AlfrescoDocument::fromRestDocument($o->entry, $this);
+		}else if($o->entry->isFolder){
+			return AlfrescoFolder::fromRestFolder($o->entry, $this);
+		}else return null;
+
 	}
 
 
-	protected function fromRestObjects($objects){
-		$ret=array();
-		if($objects){
-			foreach($objects as $object){
-				$ret[]=$this->fromRestObject($object);
+	protected function fromRestObjects($entries){
+		$ret=[];
+		if($entries && $entries->list && $entries->list->pagination &&  $entries->list->pagination->count>0){
+			foreach($entries->list->entries as $entry){
+				$ret[]=$this->fromRestObject($entry);
 			}
 		}
+
 		return $ret;
 
 	}
@@ -200,6 +273,8 @@ class AlfrescoRestProvider
 	
 	
 
+    
+
 
 	/**
 	 * Retorna un objecte d'Alfresco passant el seu ID
@@ -209,35 +284,12 @@ class AlfrescoRestProvider
 	 */
 	public function getObject($objectId){
 
-		try{
-			$curl = curl_init();
-            
-			curl_setopt_array($curl, array(
-                CURLOPT_URL => $this->generateApiUrl().'/nodes/'.$objectId,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_USERPWD => $this->apiuser.':'.$this->apipwd
-            ));
+		
 
-			$content = curl_exec($curl);
-			//dump(json_decode($content));
-            $info = curl_getinfo($curl);
-            //dump($info);
-
-            if($info['http_code'] == 200){
-                return $content;
-            } else {
-                return false;
-            }
-			//TODO
-			
-			
-		}catch(Exception $e){
-			throw new AlfrescoObjectNotFoundException(__("Object ID [:name] not found in Alfresco",["name"=>$objectId]));
-		}
+		$response=$this->call('GET','/nodes/'.$objectId);
+		$obj=$this->fromRestObject($response);
+		return $obj;
+		
 	}
 
 
@@ -248,36 +300,19 @@ class AlfrescoRestProvider
 	 * @throws AlfrescoObjectNotFoundException
 	 */
 	public function getObjectByPath($objectPath){
-		try{
+		
+		//dump($objectPath);
+		$response=$this->call('GET','/nodes/'.$this->baseid,['relativePath'=>$objectPath]);
+		//dump($response);
+		$obj=$this->fromRestObject($response);
+		return $obj;
 			
-			//TODO
-			
-			
-		}catch(Exception $e){
-			throw new AlfrescoObjectNotFoundException(__("Object Path [:name] not found in Alfresco",["name"=>$objectPath]));
-		}
+		
 	}
 
 
 
-	private function scandirRecursive($descendants){
-		
-		$objects=[];//TODO
-		
-		$ret=array();
-		foreach($objects as $obj){
-			$okobj=$this->fromRestObject($obj);
-			if($okobj->isFolder()){
-		
-				if(isset($obj->children)){
-					$ret=array_merge($ret,$this->scandirRecursive($obj->children));
-				}
-			}else{
-				$ret[]=$okobj;
-			}
-		}
-		return $ret;
-	}
+	
 
 
 	/**
@@ -311,27 +346,25 @@ class AlfrescoRestProvider
 			exit;
 
 		}else{
-			$descendants=[]; //TODO
+
 			
-			if($descendants){
-				//_dump($descendants);
-				$archives=$this->scandirRecursive($descendants);
+			//_dump($descendants);
+			$archives=$this->childrenRecursive($obj);
+			$zip = new TbsZip(); // instantiate the class
+			$zip->CreateNew(); // create a virtual new zip archive
 
-				$zip = new TbsZip(); // instantiate the class
-				$zip->CreateNew(); // create a virtual new zip archive
-
-				if($archives){
-					foreach($archives as $archive){
-						$archivepath=str_replace($obj->path."/","",$archive->path);
-						//_dump($archivepath);
-						$content= "";//TODO
-						$zip->FileAdd($archivepath, $content, TbsZip::TBSZIP_STRING);
-					}
-					// flush the result as an HTTP download
+			if($archives){
+				foreach($archives as $archive){
+					$archivepath=str_replace($obj->path."/","",$archive->path);
+					//_dump($archivepath);
+					$content= $this->getDocumentContent($archive->id);
+					$zip->FileAdd($archivepath, $content, TbsZip::TBSZIP_STRING);
 				}
-				$zip->Flush(TbsZip::TBSZIP_DOWNLOAD, $obj->name.".zip");
-				exit;
+				// flush the result as an HTTP download
 			}
+			$zip->Flush(TbsZip::TBSZIP_DOWNLOAD, $obj->name.".zip");
+			exit;
+			
 
 		}
 	}
@@ -346,18 +379,16 @@ class AlfrescoRestProvider
 	 */
 	public function getFolder($folderId){// throws AlfrescoObjectNotFoundException {
 		//RepositoryLog.debug("ALFRESCO: getFolder("+folderId+")");
-		try{
-			//TODO
+		
+		$ret=$this->getObject($folderId);
 
-			if($ret->isFolder()){
-				return $ret;
-			}else{
-				throw new AlfrescoObjectNotFoundException(__("Folder ID [:name] not found in Alfresco",array("name"=>$folderId)));
-			}
-			
-		}catch(Exception $e){
+		if($ret->isFolder()){
+			return $ret;
+		}else{
 			throw new AlfrescoObjectNotFoundException(__("Folder ID [:name] not found in Alfresco",array("name"=>$folderId)));
 		}
+			
+		
 	}
 
 	
@@ -369,19 +400,17 @@ class AlfrescoRestProvider
 	 * @throws AlfrescoObjectNotFoundException
 	 */
 	public function getFolderByPath($folderPath){// throws AlfrescoObjectNotFoundException {
-		try{
-			if($folderPath=="") return $this->getBaseFolder();
-			
-			$ret=$this->getObjectByPath($folderPath);
-			if($ret->isFolder()){
-				return $ret;
-			}else{
-				throw new AlfrescoObjectNotFoundException(__("Folder path [:name] not found in Alfresco",array("name"=>$folderPath)));
-			}
-			
-		}catch(Exception $e){
+		
+		if($folderPath=="") return $this->getBaseFolder();
+		
+		$ret=$this->getObjectByPath($folderPath);
+		if($ret->isFolder()){
+			return $ret;
+		}else{
 			throw new AlfrescoObjectNotFoundException(__("Folder path [:name] not found in Alfresco",array("name"=>$folderPath)));
 		}
+			
+		
 
 	}
 	
@@ -393,11 +422,13 @@ class AlfrescoRestProvider
 	 * @throws AlfrescoObjectNotFoundException
 	 */
 	 public function getParent($objectId){// throws AlfrescoObjectNotFoundException {
-		try{
-			//TODO
-
-		}catch(Exception $e){
+		
+		$obj=$this->getObject($objectId);
+		if($obj){
+			return $this->getObject($obj->parentId);
+		}else{
 			throw new AlfrescoObjectNotFoundException(__("Folder ID [:name] not found in Alfresco",array("name"=>$folderId)));
+
 		}
 	}
 
@@ -408,19 +439,52 @@ class AlfrescoRestProvider
 	 * @return AlfrescoFolder[]
 	 * @throws AlfrescoObjectNotFoundException
 	 */
-	public function getChildren($folderId, $objectType=false){
+	public function getChildren($folderId, $objectType=false, $page=1){
 		// throws AlfrescoObjectNotFoundException {
 		
-		try{
-			//TODO
+		
+			
+		$params=[
+			'maxItems' => self::PAGINATION_ITEMS,
+			'skipCount' => ($page-1)*self::PAGINATION_ITEMS
+		];
+		
+		if($objectType){
+			if($objectType=="folder") $params["where"]="(isFolder=true)";
+			if($objectType=="file"||$objectType=="document") $params["where"]="(isFile=true)";
+		}
 
+
+
+		$entries=$this->call('GET','/nodes/'.$folderId.'/children',$params);
+		return $this->fromRestObjects($entries);
+
+		
 
 			
-		}catch(Exception $e){
-			throw new AlfrescoObjectNotFoundException(__("Folder ID [:name] not found in Alfresco",array("name"=>$folderId)));
-		}
+		
 	}
 
+
+	private function childrenRecursive($obj){
+		
+		$children=$this->getChildren($obj->id);
+
+		if($children){
+			$ret=array();
+			foreach($children as $child){
+				if($child->isFolder()){
+					$subchild=$this->childrenRecursive($child);
+					if($subchild){
+						$ret=array_merge($ret,$subchild);
+					}
+				}else{
+					$ret[]=$child;
+				}
+			}
+			return $ret;
+		}return false;
+	}
 	
 		
 	/**
@@ -432,14 +496,16 @@ class AlfrescoRestProvider
 	 * @throws AlfrescoObjectAlreadyExistsException
 	 */
 	private function doCreateFolder($folderName, $parentfolder){ // throws AlfrescoObjectNotFoundException, AlfrescoObjectAlreadyExistsException{
-
+		//dump("doCreateFolder");
 		try{
+			$params=["name"=>$folderName, "nodeType"=>"cm:folder"];
 			
-			//TODO
-
-		}catch(Exception $e){
+			$return=$this->call('POST','/nodes/'.$parentfolder->id.'/children', [],$params);
+			$folder=$this->fromRestObject($return);
+			return $folder;
 			
-			
+		}catch(RequestException $e){
+			return false;
 		}
 
 	}
@@ -464,6 +530,7 @@ class AlfrescoRestProvider
 			$parentFolder = $this->getFolder($parentId);
 		}
 
+
 		if($parentFolder)
 			return $this->doCreateFolder($folderName,$parentFolder);
 
@@ -479,12 +546,16 @@ class AlfrescoRestProvider
 	 * @throws AlfrescoObjectNotFoundException
 	 */
 	public function getDocument($documentId){//	throws AlfrescoObjectNotFoundException {
-		try{
-			//TODO
-
-		}catch(Exception $e){
-			throw new AlfrescoObjectNotFoundException(__("Document ID [:name] not found in Alfresco", array("name"=>$documentId)));
+		
+		$ret=$this->getObject($documentId);
+		if($ret->isDocument()){
+			return $ret;
+		}else{
+			throw new AlfrescoObjectNotFoundException(__("Document ID [:name] not found in Alfresco",array("name"=>$documentId)));
+		
 		}
+
+		
 	}
 
 	
@@ -498,18 +569,16 @@ class AlfrescoRestProvider
 	 */
 	public function getDocumentByPath($documentPath){// throws AlfrescoObjectNotFoundException {
 		
-		try{
-			$ret=$this->getObjectByPath($documentPath);
-			
-			if($ret->isDocument()){
-				return $ret;
-			}else{
-				throw new AlfrescoObjectNotFoundException(__("Document path [:name] not found in Alfresco",array("name"=>$documentPath)));
-			}
-			
-		}catch(Exception $e){
+		
+		$ret=$this->getObjectByPath($documentPath);
+		
+		if($ret->isDocument()){
+			return $ret;
+		}else{
 			throw new AlfrescoObjectNotFoundException(__("Document path [:name] not found in Alfresco",array("name"=>$documentPath)));
 		}
+			
+		
 
 		
 	}
@@ -517,13 +586,11 @@ class AlfrescoRestProvider
 
 	public function getDocumentContent($documentId){
 		try{
-			//TODO
-					
+			$response=$this->call('GET','/nodes/'.$documentId.'/content');
+			return $response;
 			
-			
-			
-		}catch(Exception $e){
-			throw new AlfrescoObjectNotFoundException(__("Document ID [:name] not found in Alfresco", array("name"=>$documentId)));
+		}catch(RequestException $e){
+			return "";
 		}
 	}
 
@@ -539,7 +606,18 @@ class AlfrescoRestProvider
 	 */
 	public function delete($objectId){// throws AlfrescoObjectNotFoundException {
 		//TODO
+		$object= $this->getObject($objectId);
 
+		if($object){
+			$response=$this->call('DELETE','/nodes/'.$objectId);
+			return true;
+		}else{
+			throw new AlfrescoObjectNotFoundException(__("Document path [:name] not found in Alfresco",array("name"=>$documentPath)));
+		}
+		
+		
+
+		
 	}
 
 	
@@ -624,6 +702,47 @@ class AlfrescoRestProvider
 	
 	
 	private function doCreateDocument($parentId, $filename, $filecontent, $filetype=false, $index=0){
+
+		
+		try{
+			$args=["autoRename"=>true];
+			$json=["name"=>$filename, "nodeType"=>"cm:content" ,"aspectNames"=>["cm:versionable","cm:titled","cm:auditable","cm:author"]];
+			//dump($parentId);
+			//dump($json);
+			$return=$this->call('POST','/nodes/'.$parentId.'/children', $args, $json);
+			//dump($return);
+			$doc=$this->fromRestObject($return);
+			//dump($doc);
+			if($doc){
+				//dump($json);
+				$return=$this->call('PUT','/nodes/'.$doc->id.'/content', [],[],$filecontent);
+				$doc=$this->fromRestObject($return);
+			}
+			//dd($doc);
+
+			//$doc=$this->fromRestObject($return);
+			return $doc;
+			
+
+		}catch(Exception $e){
+			//dd($e->getMessage());
+			if($this->isRepeatedRename()){
+				//_dump($filename);
+				$newname=AlfrescoHelper::generateNewName($filename,$index);
+				return $this->doCreateDocument($parentId, $newname, $filecontent, $filetype, ($index+1));
+
+			}else if($this->isRepeatedOverwrite()){
+				//delete original
+				$obj=$this->getObjectByPath($folder->path."/".$filename);
+				$obj->delete();
+				$this->doCreateDocument($parentId, $filename, $filecontent, $filetype);
+
+			}else{
+				throw new AlfrescoObjectAlreadyExistsException(__("Object with name ':name' already exists in folder :path in Alfresco", array("name"=>$filename,"path"=>$folder->path)));
+
+			}
+			return false;
+		}
 
 		//_dump($filename);
 		//TODO
@@ -744,7 +863,9 @@ class AlfrescoRestProvider
 	 */
 	public function search($query, $folderId=false, $recursive=false){// throws AlfrescoObjectNotFoundException {
 		//TODO
-
+		$results=$this->call("GET","/queries/nodes",["term"=>$query,"rootNodeId"=>$folderId]);
+		return $this->fromRestObjects($results);
+		
 		//return manageDocumentQuery(qs);*/
 		
 	}

@@ -29,7 +29,9 @@ abstract class AlfrescoObject {
 	public abstract function moveTo($parentId);// throws AlfrescoObjectNotFoundException, RepositoryObjectAlreadyExistsException;
 	public abstract function moveToPath($parentPath);// throws AlfrescoObjectNotFoundException, RepositoryObjectAlreadyExistsException;
 	
-	public abstract function isFolder();
+	public function isFolder() {
+		return $this->type == AlfrescoFolder::OBJECT_TYPE || $this->type =="folder";
+	}
 	
 	public function isDocument(){ 
 		return $this->isFile();

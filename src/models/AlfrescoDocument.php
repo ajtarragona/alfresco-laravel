@@ -41,7 +41,52 @@ class AlfrescoDocument extends AlfrescoObject {
 	public function __construct() {
 		$this->type=self::OBJECT_TYPE;
 	}
-	
+		
+
+	/**
+	 * Converteix un objecte Document de l'API REst d'Alfresco en un AlfrescoDocument
+	 * @param cmisdocument
+	 * @param provider
+	 * @return
+	 */
+	public static function fromRestDocument($document, $provider){
+		$doc = new self();
+		$doc->type="document";
+		$doc->provider($provider);
+
+		$doc->id = $document->id;
+		$doc->name = $document->name;
+		$doc->description = isset($document->properties->{'cm:description'})?$document->properties->{'cm:description'}:'';
+		$doc->title = isset($document->properties->{'cm:title'})?$document->properties->{'cm:title'}:'';
+		$doc->createdBy = $document->createdByUser->id;
+		$doc->updatedBy = $document->modifiedByUser->id;
+		$doc->version = isset($document->properties->{'cm:versionLabel'})?$document->properties->{'cm:versionLabel'}:'';
+		$doc->author = isset($document->properties->{'cm:author'})?$document->properties->{'cm:author'}:'';
+
+
+		$doc->extension = AlfrescoHelper::getExtension($doc->name);
+		
+		$doc->parentId = $document->parentId;
+		
+		$doc->fullpath = $document->path->name."/".$doc->name;
+		$doc->path = ltrim(substr( $doc->fullpath , strlen($provider->getRootPath())),"/");
+		
+		$doc->created =$document->createdAt;
+		$doc->updated = $document->modifiedAt;
+
+		//_dump($provider);
+
+		$doc->downloadurl = $provider->getDownloadUrl($doc); //($cmisdocument->getContentUrl());
+		$doc->viewurl = $provider->getViewUrl($doc); //($cmisdocument->getContentUrl());
+
+		$doc->mimetype =  $document->content->mimeType;
+		$doc->mimetypedescription = $document->content->mimeTypeName;
+		
+		$doc->size = $document->content->sizeInBytes;
+		$doc->encoding = $document->content->encoding;
+		$doc->humansize = AlfrescoHelper::humanFileSize($doc->size);
+		return $doc;
+	}
 	
 	/**
 	 * Converteix un objecte Document de l'API CMIS d'Alfresco en un AlfrescoDocument
@@ -50,13 +95,14 @@ class AlfrescoDocument extends AlfrescoObject {
 	 * @return
 	 */
 	public static function fromCmisDocument($cmisdocument, $provider){
-		//_dump($cmisdocument);
+		//dump($cmisdocument);
 		$doc = new self();
 		
 		$doc->cmisdocument($cmisdocument);
 		$doc->provider($provider);
 
 		$doc->id = $cmisdocument->prop("objectId");
+		//$doc->id = explode(";", $doc->id)[0]; //removes version
 		$doc->name = $cmisdocument->prop("name");
 		$doc->description = $cmisdocument->prop("description","cm");
 		$doc->title = $cmisdocument->prop("title","cm");
@@ -162,14 +208,7 @@ class AlfrescoDocument extends AlfrescoObject {
 	
 	
 	
-	
-	
-	
-	public function isFolder() {
-		return $this->type != self::OBJECT_TYPE;
-	}
-
-	
+		
 	
 
 

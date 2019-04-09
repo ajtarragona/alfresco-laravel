@@ -151,8 +151,8 @@ class AlfrescoService
 	 * @return AlfrescoFolder[]
 	 * @throws AlfrescoObjectNotFoundException
 	 */
-	public function getChildren($folderId, $objectType=false){
-		return $this->provider->getChildren($folderId, $objectType);
+	public function getChildren($folderId, $objectType=false,$page=1){
+		return $this->provider->getChildren($folderId, $objectType,$page);
 	}
 
 	

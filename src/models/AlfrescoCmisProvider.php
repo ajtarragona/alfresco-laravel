@@ -92,11 +92,12 @@ class AlfrescoCmisProvider
 		try{
 			$apiurl=$this->generateApiUrl();
 			
-			if($this->debug) Log::debug("ALFRESCO: Connecting CMIS to API:" .$apiurl);
+			if($this->debug) Log::debug("ALFRESCO: Connecting to CMIS API:" .$apiurl);
 			
 			$this->session = new CMISService($apiurl, $this->apiuser, $this->apipwd);
 
 			$ret=$this->session->getObjectByPath($this->getBasepath(true));
+			
 			if(!$ret){
 				Log::error("Alfresco basepath not found");
 				throw new AlfrescoObjectNotFoundException(__("Alfresco basepath not found"));
@@ -644,17 +645,19 @@ class AlfrescoCmisProvider
 	public function delete($objectId){// throws AlfrescoObjectNotFoundException {
 		$cmisobject= $this->session->getObject($objectId);
 		$obj=$this->fromCmisObject($cmisobject);
-		//dd($obj);
 		try{
+
 			if($obj->isDocument()){
+				//dd($obj->id);
 				$ret=$this->session->deleteObject($obj->id);
-				//dd($ret);
+				dd($ret);
 				return $ret==false;
 			}else{
 				$ret=$this->session->deleteTree($obj->id);
 				return $ret->numItems==-1;
 			}
 		}catch(CmisPermissionDeniedException |CmisRuntimeException $e){
+			dd($e);
 			return false;
 		}
 

@@ -32,6 +32,41 @@ class AlfrescoFolder extends AlfrescoObject{
 	}
 	
 	
+
+
+	/**
+	 * Converteix un objecte Folder de l'API REst d'Alfresco en un AlfrescoFolder
+	 * @param folder
+	 * @param provider
+	 * @return
+	 */
+	public static function fromRestFolder($folder, $provider){
+		$f = new self();
+		$f->type="folder";
+		$f->provider($provider);
+		
+		$f->id = $folder->id;
+		$f->name = $folder->name;
+		$f->description = isset($folder->properties->{'cm:description'})?$folder->properties->{'cm:description'}:'';
+		$f->createdBy = $folder->createdByUser->id;
+		$f->updatedBy = $folder->modifiedByUser->id;
+		
+
+		$f->parentId = $folder->parentId;
+		
+		$f->fullpath = $folder->path->name."/".$f->name;
+		$f->path = ltrim(substr( $f->fullpath , strlen($provider->getRootPath())),"/");
+
+		
+		//$f->path = substr( $f->fullpath , strlen($provider->getBasepath(true)));
+		
+		$f->created =$folder->createdAt;
+		$f->updated = $folder->modifiedAt;
+
+		$f->downloadurl = $provider->getDownloadUrl($f); //($cmisdocument->getContentUrl());
+		return $f;
+
+	}
 	
 	/**
 	 * Converteix un objecte Folder de l'API CMIS d'Alfresco en un AlfrescoFolder
@@ -73,8 +108,8 @@ class AlfrescoFolder extends AlfrescoObject{
 	 * Retorna els fills d'una carpeta Alfresco
 	 * @return
 	 */
-	public function getChildren($objectType=false) {
-		return $this->provider()->getChildren($this->id,$objectType);
+	public function getChildren($objectType=false,$page=1) {
+		return $this->provider()->getChildren($this->id,$objectType,$page);
 	}
 
 
@@ -179,9 +214,7 @@ class AlfrescoFolder extends AlfrescoObject{
 	
 
 	
-	public function isFolder() {
-		return $this->type == self::OBJECT_TYPE;
-	}
+	
 
 	/**
 	 * Retorna el número d'arxius que conté aquesta carpeta. Opcionalment podem recòrrer recursivament totes les carpetes filles (pot ser lent).

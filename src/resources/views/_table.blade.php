@@ -1,4 +1,4 @@
-<table class="table">
+<table class="table table-hover table-sm table-selectable">
 	<thead >
 		<tr>
 			{{-- <th class="no-sort" data-order="desc" data-order-priority="1">&nbsp;</th> --}}
