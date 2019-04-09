@@ -443,7 +443,9 @@ class CmisRepositoryWrapper
         {
         	if ($pn->attributes) {
 				//supressing errors since PHP sometimes sees DOM elements as "non-objects"
-				@$retval->properties[$pn->attributes->getNamedItem("propertyDefinitionId")->nodeValue] = $pn->getElementsByTagName("value")->item(0)->nodeValue;
+                if(isset($pn->attributes->getNamedItem("propertyDefinitionId")->nodeValue) && isset($pn->getElementsByTagName("value")->item(0)->nodeValue)){
+				    @$retval->properties[$pn->attributes->getNamedItem("propertyDefinitionId")->nodeValue] = $pn->getElementsByTagName("value")->item(0)->nodeValue;
+                }
 			}
         }
         

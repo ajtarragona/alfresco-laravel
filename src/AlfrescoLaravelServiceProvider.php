@@ -3,7 +3,7 @@
 namespace Ajtarragona\AlfrescoLaravel;
 
 use Illuminate\Support\ServiceProvider;
-use Ajtarragona\AlfrescoLaravel\Models\AlfrescoProvider;
+use Ajtarragona\AlfrescoLaravel\Models\AlfrescoService;
 
 class AlfrescoLaravelServiceProvider extends ServiceProvider
 {
@@ -53,7 +53,7 @@ class AlfrescoLaravelServiceProvider extends ServiceProvider
         //$this->app->make('Ajtarragona\AlfrescoLaravel\Models\AlfrescoLaravel');
 
         $this->app->bind('alfresco', function(){
-            return new \Ajtarragona\AlfrescoLaravel\Models\AlfrescoProvider;
+            return new \Ajtarragona\AlfrescoLaravel\Models\AlfrescoService;
         });
 
 

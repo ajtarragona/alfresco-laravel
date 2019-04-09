@@ -129,6 +129,7 @@ class AlfrescoLaravelController extends Controller
     public function info($id)
     {
         $object=Alfresco::getObject($id);
+        //dd($object);
         $attributes=get_object_vars($object);
         ksort($attributes);
 

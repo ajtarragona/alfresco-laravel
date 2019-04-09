@@ -26,7 +26,7 @@ use Ajtarragona\AlfrescoLaravel\Models\Helpers\AlfrescoHelper;
 use Log;
 use Exception;
 
-class AlfrescoProvider
+class AlfrescoCmisProvider
 {
 
     const REPEATED_RENAME = "rename";
@@ -48,22 +48,29 @@ class AlfrescoProvider
 	protected $debug;
 
 
+	
+
 	public function __construct($settings=false) { 
 
-		if(!$settings) $settings=config('alfresco');
-		$settings=to_object($settings);
+		if(!$settings){
+			$settings=config('alfresco');
+			$settings=to_object($settings);
+		}
 		
 		$this->rootpath=$settings->base_path;
 		if(!ends_with($this->rootpath,"/")) $this->rootpath.="/";
 		
 		
+
 		$this->basepath= "";
+
 		$this->alfrescourl = $settings->url;
 		if(!ends_with($this->alfrescourl,"/")) $this->alfrescourl.="/";
 
 		$this->apiuser = $settings->user;
 		$this->apipwd = $settings->pass;
 		
+		$this->api= $settings->api;
 		$this->apiversion = $settings->api_version;
 		
 		$this->repoId = $settings->repository_id;
@@ -85,7 +92,7 @@ class AlfrescoProvider
 		try{
 			$apiurl=$this->generateApiUrl();
 			
-			if($this->debug) Log::debug("ALFRESCO: Connecting to API:" .$apiurl);
+			if($this->debug) Log::debug("ALFRESCO: Connecting CMIS to API:" .$apiurl);
 			
 			$this->session = new CMISService($apiurl, $this->apiuser, $this->apipwd);
 
@@ -176,7 +183,7 @@ class AlfrescoProvider
 	 * @param o
 	 * @return
 	 */
-	public function fromCmisObject($o){
+	protected function fromCmisObject($o){
 		//dump($o);
 		$obj=new AlfrescoCmisObject($o);
 
@@ -192,7 +199,7 @@ class AlfrescoProvider
 	}
 
 
-	public function fromCmisObjects($objects){
+	protected function fromCmisObjects($objects){
 		$ret=array();
 		if($objects){
 			foreach($objects as $object){
@@ -237,9 +244,9 @@ class AlfrescoProvider
 	 * @throws AlfrescoObjectNotFoundException
 	 */
 	public function getObject($objectId){
+
 		try{
 			$tmp= $this->session->getObject($objectId);
-
 			$ret=$this->fromCmisObject($tmp);
 			
 			$this->checkInBaseFolder($ret);
@@ -1102,12 +1109,9 @@ class AlfrescoProvider
 	}
 	
 
-	
-	
+
 	public function getDownloadUrl($object){
 		return route('alfresco.download',[$object->id]);
-
-        
     }
     
     /*return the user download url of a file */
