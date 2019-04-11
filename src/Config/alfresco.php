@@ -8,7 +8,6 @@ return [
 	'api' => env('ALFRESCO_API','cmis'), //cmis or rest
 	'api_version' => env('ALFRESCO_API_VERSION','1.1'), //alfresco api version
 	'repository_id' => env('ALFRESCO_REPOSITORY_ID','-default-'), //Repository where the files will we uploaded
-	'siteid' => env('ALFRESCO_SITE_ID','swsdp'), //Site where the files will we uploaded
 	'base_id' => env('ALFRESCO_BASE_ID','12345678-1234-1234-1234-12345678900'), //Folder where the files will we uploaded, must already exist in the site
 	'base_path' => env('ALFRESCO_BASE_PATH','/Sites'), //Folder where the files will we uploaded, must already exist in the site
 	'user' => env('ALFRESCO_USER','admin'), //Username to acces alfresco

@@ -3,14 +3,14 @@
 Route::group(['prefix' => 'ajtarragona/alfresco','middleware' => ['web','auth','language']	], function () {
 
 	
-	
-	//Route::get('test', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@index');
-	
+		
 	Route::get('download/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@download')->name("alfresco.download");
+
+	Route::get('view/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@view')->name("alfresco.view");
+
 
 	Route::delete('delete/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@delete')->name("alfresco.delete");
 	
-	Route::get('view/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@view')->name("alfresco.view");
 
 	Route::get('info/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@info')->name("alfresco.info");
 
@@ -23,11 +23,24 @@ Route::group(['prefix' => 'ajtarragona/alfresco','middleware' => ['web','auth','
 	Route::post('createfolder/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@createfolder')->name("alfresco.createfolder");
 
 
+	Route::get('rename/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@renamemodal')->name("alfresco.renamemodal");
+
+	Route::post('rename/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@rename')->name("alfresco.rename");
+
+
 	Route::post('search/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@search')->name("alfresco.search");
 	
 	Route::get('searchresults', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@searchresults')->name("alfresco.searchresults");
 
+	Route::post('batch/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@batch')->name("alfresco.batch");
+
+	Route::post('copy/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@copymodal')->name("alfresco.copymodal");
+
+	Route::post('move/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@movemodal')->name("alfresco.movemodal");
 
 
-	Route::get('/go/{folder?}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@show')->name("alfresco.show")->where('folder', '(.*)');
+	Route::get('tree/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@tree')->name("alfresco.tree");
+
+
+	Route::get('/explorer/{folder?}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@explorer')->name("alfresco.explorer")->where('folder', '(.*)');
 });

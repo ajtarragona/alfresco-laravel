@@ -1,8 +1,12 @@
-<table class="table table-hover table-sm table-selectable">
+<table class="table table-hover table-sm" id="alfresco-table" data-selectable="true" data-select-style="info">
 	<thead >
 		<tr>
 			{{-- <th class="no-sort" data-order="desc" data-order-priority="1">&nbsp;</th> --}}
-			<th>&nbsp;</th>
+			<th>
+				@button(['id'=>'checkall-btn','size'=>'xs','style'=>'light']) 
+					@icon('check-double') 
+				@endbutton
+			</th>
 			<th>
 				@sortablelink('NAME',__('Nom'))
 				
@@ -25,9 +29,9 @@
 	<tbody>
 		@foreach($children as $child)
 			@if($child->isFile())
-				@include('alfresco::file-row',['file'=>$child])
+				@include('alfresco::parts.file-row',['file'=>$child])
 			@else
-				@include('alfresco::folder-row',['folder'=>$child])
+				@include('alfresco::parts.folder-row',['folder'=>$child])
 			@endif
 		@endforeach
 	</tbody>

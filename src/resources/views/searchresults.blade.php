@@ -14,7 +14,8 @@
 
 
 @section('actions')
-	
+	@include('alfresco::parts.table-actions')
+
 @endsection
 
 
@@ -22,33 +23,31 @@
 		{{-- @dump($breadcrumb) --}}
 
 		{{-- @dump($folder) --}}
-		@include('alfresco::_searchform')
+		@include('alfresco::parts.searchform')
 
 		<p class="text-muted text-center">
 			Resultats per la cerca '<strong>{{$search_term}}</strong>'' 
 				@if($search_recursive) 
 					a <strong>totes</strong> les carpetes {!! !$folder->isBaseFolder()?"a partir de <strong>".$folder->name."</strong>":"" !!}
 				@else 
-					a la carpeta <strong>{{ $folder->isBaseFolder()?"arrel":$folder->name }}</strong> 
+					a la carpeta <strong>{{ $folder->isBaseFolder()?"arrel":$folder->path }}</strong> 
 				@endif
-			: {{ $results?count($results):0}}
+			: @badge(['pill'=>true,'type'=>'dark']) {{ $results?count($results):0}} @endbadge
 		</p>
 
 		@if($results)
 			
-			@include("alfresco::_table",['children'=>$results])
+			@include("alfresco::parts.table",['children'=>$results])
 		
 		@endif
 		
 
 @endsection
 
-
-@section('style')
-	{{-- <link href="{{ asset('vendor/ajtarragona/css/accede.css') }}" rel="stylesheet"> --}}
+@section('js')
+	@include('alfresco::parts.tablescript')
 @endsection
 
-
-@section('js')
-	{{-- <script src="{{ asset('vendor/ajtarragona/js/accede.js')}}" language="JavaScript"></script> --}}
+@section('css')
+	@include('alfresco::parts.tablestyles')
 @endsection

@@ -125,7 +125,7 @@ class AlfrescoHelper{
     {
     	//return $name;
 
-    	return preg_replace('/[^ +a-zA-Z0-9-_\.\/]/', '',removeAccents($name));
+    	return preg_replace('/[^ a-zA-Z0-9-_\.]/', '',removeAccents($name));
 
     	//return snake_case($name);
     	/*$output = htmlspecialchars($name, 0, "UTF-8");
@@ -142,7 +142,7 @@ class AlfrescoHelper{
 
 	public static function sanitizeDir($name)
     {
-    	return preg_replace('/[^ +a-zA-Z0-9-_\.\/]/', '',removeAccents( $str));
+    	return preg_replace('/[^ a-zA-Z0-9-_\.]/', '',removeAccents( $str));
 
        //return $name; // return strtolower(preg_replace('/[^a-zA-Z0-9-_\.\/]/', '_', $name));
     }

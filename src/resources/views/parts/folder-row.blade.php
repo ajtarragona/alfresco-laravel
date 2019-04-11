@@ -1,10 +1,10 @@
 <tr>
 	
 	<td width="1%">
-		@checkbox(['class'=>"tablecheck",'name'=>"fileselected", 'value'=> $folder->id])
+		@checkbox(['class'=>"tablecheck",'color'=>'info','name'=>"fileselected", 'value'=> $folder->id])
 	</td>
 	<td width="40%">
-		<a href="{{ route('alfresco.show',[$folder->path]) }}" class="text-dark  text-decoration-none">
+		<a href="{{ route('alfresco.explorer',[$folder->path]) }}" class="text-dark  text-decoration-none">
 			{!! $folder->renderIcon() !!}{{ $folder->name }}
 		</a>
 	</td>
@@ -17,6 +17,14 @@
 			<a class="btn btn-xs btn-info" href="{{ route('alfresco.info',[$folder->id]) }}">
 				@icon("info-circle")
 			</a>
+			@modalopener([
+				'href'=>route('alfresco.renamemodal',[$folder->id]),
+				'style' => 'light',
+				'class' =>'btn btn-secondary btn-xs'
+			])
+				@icon("font")
+			@endmodalopener
+			
 			<a class="btn btn-xs btn-secondary" href="{{ route('alfresco.download',[$folder->id]) }}">
 				@icon("download")
 			</a>

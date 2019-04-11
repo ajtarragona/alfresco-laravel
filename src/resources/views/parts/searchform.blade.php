@@ -1,23 +1,23 @@
 @form([
 	'action'=>route('alfresco.search',[$folder->id]),
 	'method'=>'post',
-	'class'=>'mb-3 form-inline justify-content-center'
+	'class'=>'mb-3'
 	])
 	
 	
-	@inputgroup	
+	{{-- @inputgroup	 --}}
 
 		@input([
 			'name'=>'term',
 			'placeholder'=>'Introdueix la cerca',
 			'icon'=>'search',
 			'containerclass'=>'mb-0',
-			'value'=>'',
+			'value'=>''
 
 		])
 
 
-	  <div class="input-group-append">
+	 {{--  <div class="input-group-append">
 		@button(['type'=>'submit','class'=>'btn-sm','style'=>'secondary']) Buscar @endbutton
 	  </div>
 
@@ -27,7 +27,7 @@
 	  		@checkbox(['label'=>'Recursiu','name'=>'recursive','checked'=>false])
 	  	</div>
 
-	  </div>
+	  </div> --}}
 
-	@endinputgroup
+	{{-- @endinputgroup --}}
 @endform

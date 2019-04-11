@@ -1,7 +1,7 @@
 @extends('ajtarragona-web-components::layout/master-sidebar')
 
 @section('title')
-	@lang('Alfresco')
+	{{ $object->name }} 
 @endsection
 
 
@@ -45,7 +45,11 @@
 @section('body')
 	<p class="lead">{!! $object->renderIcon() !!}{{ $object->name }}</p>
 
-	@row
+	@button(['href'=> route('alfresco.explorer',[$object->getParent()->path]),'style'=>'light','size'=>'sm'])
+		@icon('angle-left') @lang("Tornar enrera")
+	@endbutton
+
+	@row(['class'=>'mt-3'])
 		@col(['size'=>6])
 			<table class="table table-bordered table-sm" >
 				@foreach($attributes as $name=>$value)
@@ -86,6 +90,3 @@
 @endsection
 
 
-@section('js')
-	{{-- <script src="{{ asset('vendor/ajtarragona/js/accede.js')}}" language="JavaScript"></script> --}}
-@endsection

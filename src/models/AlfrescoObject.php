@@ -45,7 +45,7 @@ abstract class AlfrescoObject {
         return json_encode($this);
     }
 	public function isBaseFolder(){
-		return $this->isFolder() && $this->path==$this->fullpath;
+		return $this->isFolder() && ($this->path=="" || $this->path==$this->fullpath);
 	}
 
 	public function getBreadcrumb(){
