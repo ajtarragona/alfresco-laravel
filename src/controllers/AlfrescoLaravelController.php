@@ -360,49 +360,53 @@ class AlfrescoLaravelController extends Controller
         $path=($folder->isBaseFolder())?'':$folder->path;
         $selected=json_decode($request->selected);
         
-       
+        
         $ok=[];
         $err=[];
+        if($selected){
+            switch($request->submitaction){
+                case "copy":
+                    if($request->folderId){
+                        $folderId=$request->folderId;
+                        foreach($selected as $fid){
+                            $copied=Alfresco::getObject($fid);
+                            try{
+                                $ret=Alfresco::copy($fid, $folderId);
+                                if($ret) $ok[]=__("Arxiu <strong>:name</strong> copiat correctament",["name"=>$ret->name]);
+                                else $err[]=__("Error copiant l'arxiu <strong>:name</strong>",["name"=>$ret->name]);
+                            }catch(AlfrescoObjectAlreadyExistsException $e){
+                                $err[]=__("Ja existeix un arxiu amb el mateix nom <strong>:name</strong> a la carpeta destí",["name"=>$copied->name]);
+                            }
+                        }  
+                    }
+                    break;
+                case "move":
+                    if($request->folderId){
+                        $folderId=$request->folderId;
+                        foreach($selected as $fid){
+                            $copied=Alfresco::getObject($fid);
+                            try{
+                                $ret=Alfresco::move($fid, $folderId);
+                                if($ret) $ok[]=__("Arxiu <strong>:name</strong> mogut correctament",["name"=>$ret->name]);
+                                else $err[]=__("Error movent l'arxiu <strong>:name</strong>",["name"=>$ret->name]);
+                            }catch(AlfrescoObjectAlreadyExistsException $e){
+                               $err[]=__("Ja existeix un arxiu amb el mateix nom <strong>:name</strong> a la carpeta destí",["name"=>$copied->name]);
+                            }
+                        }
+                    }
+                    break;
+                case "delete":
+                    foreach($selected as $fid){
+                        $ret=Alfresco::delete($fid);
+                        if($ret) $ok[]=__("Arxiu <strong>:id</strong> esborrat correctament",["id"=>$fid]);
+                        else $err[]=__("Error esborrant l'arxiu <strong>:id</strong>",["id"=>$fid]);
+                    }
+                    break;
+                default:break;
+            }
 
-        switch($request->submitaction){
-            case "copy":
-                $folderId=$request->folderId;
-               
-                foreach($selected as $fid){
-                    $copied=Alfresco::getObject($fid);
-                    try{
-                        $ret=Alfresco::copy($fid, $folderId);
-                        if($ret) $ok[]=__("Arxiu <strong>:name</strong> copiat correctament",["name"=>$ret->name]);
-                        else $err[]=__("Error copiant l'arxiu <strong>:name</strong>",["name"=>$ret->name]);
-                    }catch(AlfrescoObjectAlreadyExistsException $e){
-                        $err[]=__("Ja existeix un arxiu amb el mateix nom <strong>:name</strong> a la carpeta destí",["name"=>$copied->name]);
-                    }
-                }
-                break;
-            case "move":
-                $folderId=$request->folderId;
-                foreach($selected as $fid){
-                    $copied=Alfresco::getObject($fid);
-                    try{
-                        $ret=Alfresco::move($fid, $folderId);
-                        if($ret) $ok[]=__("Arxiu <strong>:name</strong> mogut correctament",["name"=>$ret->name]);
-                        else $err[]=__("Error movent l'arxiu <strong>:name</strong>",["name"=>$ret->name]);
-                    }catch(AlfrescoObjectAlreadyExistsException $e){
-                       $err[]=__("Ja existeix un arxiu amb el mateix nom <strong>:name</strong> a la carpeta destí",["name"=>$copied->name]);
-                    }
-                }
-                break;
-            case "delete":
-                foreach($selected as $fid){
-                    $ret=Alfresco::delete($fid);
-                    if($ret) $ok[]=__("Arxiu <strong>:id</strong> esborrat correctament",["id"=>$fid]);
-                    else $err[]=__("Error esborrant l'arxiu <strong>:id</strong>",["id"=>$fid]);
-                }
-                break;
-            default:break;
         }
 
-        
         $return=redirect()->route('alfresco.explorer',[$path]);
          
         if($ok) $return->with('success', implode("<br/>", $ok));

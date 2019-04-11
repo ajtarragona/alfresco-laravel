@@ -6,7 +6,7 @@
 
 
 @section('body')
-	@form(['action'=>route('alfresco.rename',[$object->id]),'method'=>'post'])
+	@form(['action'=>route('alfresco.rename',[$object->id]),'method'=>'post','autoselect'=>'name'])
 		
 		@input([
 			'name'=>'name',

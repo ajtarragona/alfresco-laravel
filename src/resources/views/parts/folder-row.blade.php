@@ -12,7 +12,7 @@
 	<td width="20%"></td>
 	<td width="10%"><span class="text-muted">{{ $folder->updatedBy }}</span></td>
 	<td width="10%"></td>
-	<td class="text-right">
+	<td class="text-right row-actions">
 		@buttongroup
 			<a class="btn btn-xs btn-info" href="{{ route('alfresco.info',[$folder->id]) }}">
 				@icon("info-circle")

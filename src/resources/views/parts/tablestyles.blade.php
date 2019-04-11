@@ -26,4 +26,13 @@
 		text-decoration: line-through;
 	}
 
+
+	#alfresco-table tbody tr td.row-actions .btn-group{
+		opacity:0;
+	}
+	
+	#alfresco-table tbody tr:hover td.row-actions .btn-group{
+		opacity:1;
+	}
+
 </style>
