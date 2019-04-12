@@ -44,10 +44,10 @@
 
 @section('body')
 	<p class="lead">{!! $object->renderIcon() !!}{{ $object->name }}</p>
-
-	@button(['href'=> route('alfresco.explorer',[$object->getParent()->path]),'style'=>'light','size'=>'sm'])
-		@icon('angle-left') @lang("Tornar enrera")
-	@endbutton
+	
+		@button(['href'=> route('alfresco.explorer',[$object->isDocument()?$object->getParent()->path:$object->path]),'style'=>'light','size'=>'sm'])
+			@icon('angle-left') @lang("Tornar enrera")
+		@endbutton
 
 	@row(['class'=>'mt-3'])
 		@col(['size'=>6])

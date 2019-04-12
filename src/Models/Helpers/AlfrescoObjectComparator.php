@@ -33,7 +33,7 @@ class AlfrescoObjectComparator {
 	}
 
 	public function sortAlphabetical($objects,$attribute){
-			
+		if(!$objects) return;
 		usort($objects, function($o1, $o2) use ($attribute){
 
 			$n1=removeAccents($o1->$attribute);
@@ -71,7 +71,7 @@ class AlfrescoObjectComparator {
 
 
 	public function sortBySize($objects){
-	
+		if(!$objects) return;
 		usort($objects, function($o1, $o2){
 			$n1=removeAccents($o1->name);
 			$n2=removeAccents($o2->name);
@@ -107,7 +107,8 @@ class AlfrescoObjectComparator {
 
 
 	public function sortByCreated($objects){
-	
+		if(!$objects) return;
+		
 		usort($objects, function($o1, $o2){
 			
 			$compare = ($o1->created > $o2->created)?1:-1;
@@ -128,7 +129,8 @@ class AlfrescoObjectComparator {
 	}
 
 	public function sortByUpdated($objects){
-	
+		if(!$objects) return;
+
 		usort($objects, function($o1, $o2){
 						
 			$compare = ($o1->updated > $o2->updated)?1:-1;
@@ -150,7 +152,8 @@ class AlfrescoObjectComparator {
 	
 	
 	public function sortByType($objects){
-		
+		if(!$objects) return;
+
 		usort($objects, function($o1, $o2){
 
 			$m1=$o1->isDocument()?($o1->mimetype?$o1->mimetype:""):"";

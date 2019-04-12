@@ -5,7 +5,7 @@ use Ajtarragona\AlfrescoLaravel\Models\Helpers\AlfrescoHelper;
 
 class AlfrescoDocument extends AlfrescoObject {
 	
-	const OBJECT_TYPE = "cmis:document";
+	
 	public $extension;
 	public $mimetype;
 	public $mimetypedescription;
@@ -39,7 +39,7 @@ class AlfrescoDocument extends AlfrescoObject {
 
 	
 	public function __construct() {
-		$this->type=self::OBJECT_TYPE;
+		
 	}
 		
 
@@ -51,8 +51,8 @@ class AlfrescoDocument extends AlfrescoObject {
 	 */
 	public static function fromRestDocument($document, $provider){
 		$doc = new self();
-		$doc->type="document";
 		$doc->provider($provider);
+		$doc->type=$provider::TYPE_DOCUMENT;
 
 		$doc->id = $document->id;
 		$doc->name = $document->name;
@@ -100,6 +100,7 @@ class AlfrescoDocument extends AlfrescoObject {
 		
 		$doc->cmisdocument($cmisdocument);
 		$doc->provider($provider);
+		$doc->type=$provider::TYPE_DOCUMENT;
 
 		$doc->id = $cmisdocument->prop("objectId");
 		//$doc->id = explode(";", $doc->id)[0]; //removes version

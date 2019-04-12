@@ -2,7 +2,7 @@
 	<ul>
 		{{-- @dump($folder) --}}
 		@foreach($folders as $thisfolder)
-			<li class="folder {{$thisfolder->id==$folder->id?"disabled":""}} {{($thisfolder->getChildren('folder')?'has-children':'')}}" data-id="{{$thisfolder->id}}">
+			<li class="folder {{$thisfolder->id==$folder->id?"disabled":""}} {{($thisfolder->getFolders()?'has-children':'')}}" data-id="{{$thisfolder->id}}">
 				<span class="folder-node">
 					<span class="opener">{!! $thisfolder->renderIcon() !!}</span> 
 					<span class="folder-text">{{ $thisfolder->name }}</span>

@@ -10,12 +10,13 @@
     @breadcrumb([
     	'items'=> $breadcrumb
     ])
+
 @endsection
 
 
 @section('actions')
 	
-		
+		@badge API: @badge(['type'=>'dark']) {{ strtoupper(config('alfresco.api'))}} @endbadge @endbadge
 		@include('alfresco::parts.folder-actions')
 		@include('alfresco::parts.table-actions')
 
@@ -30,7 +31,7 @@
 		{{-- @dump($folder) --}}
 
 
-		
+			
 		@if($children)
 			@include('alfresco::parts.searchform')
 			@include("alfresco::parts.table",['children'=>$children])

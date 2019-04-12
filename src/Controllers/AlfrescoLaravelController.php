@@ -97,7 +97,6 @@ class AlfrescoLaravelController extends Controller
     {
         $obj=Alfresco::getObject($id);
         $path=$obj->getParent()->path;
-        $path=($obj->getParent()->isBaseFolder())?'':$obj->getParent()->path;
         
         
 
@@ -155,7 +154,7 @@ class AlfrescoLaravelController extends Controller
         $folder=Alfresco::getObject($id);
 
                 
-        $path=($folder->isBaseFolder())?'':$folder->path;
+        $path=$folder->path;
         $docs=$request->documents;
         if($docs){
             $ret = Alfresco::upload($id,$docs);
@@ -210,8 +209,8 @@ class AlfrescoLaravelController extends Controller
         //dd($request->all());
         $name = $request->name;
         $parent=Alfresco::getObject($id);
-        $path=($parent->isBaseFolder())?'':$parent->path;
 
+        $path=$parent->path;
         try{
             $folder=$parent->createFolder($name);
             
@@ -251,7 +250,7 @@ class AlfrescoLaravelController extends Controller
         $name = $request->name;
         $object=Alfresco::getObject($id);
         $parent=$object->getParent();
-        $path=($parent->isBaseFolder())?'':$parent->path; 
+        $path=$parent->path; 
 
         try{
             $object=$object->rename($name);
@@ -320,7 +319,7 @@ class AlfrescoLaravelController extends Controller
     public function copymodal($id, Request $request){
         
         $folder=Alfresco::getObject($id);
-        $path=($folder->isBaseFolder())?'':$folder->path;
+        $path=$folder->path;
         //$basefolder=Alfresco::getBaseFolder();
 
         $selected=$request->selected;
@@ -333,7 +332,7 @@ class AlfrescoLaravelController extends Controller
 
     public function movemodal($id,Request $request){
         $folder=Alfresco::getObject($id);
-        $path=($folder->isBaseFolder())?'':$folder->path;
+        $path=$folder->path;
   
         $selected=$request->selected;
         $folders = [Alfresco::getBaseFolder()];//->getChildren("folder");
@@ -344,7 +343,7 @@ class AlfrescoLaravelController extends Controller
 
     public function tree($id, Request $request){
         
-        $folders = Alfresco::getFolder($id)->getChildren("folder");
+        $folders = Alfresco::getFolder($id)->getFolders();
         $params=compact('folders');
 
         if(isset($request->currentFolderId)){
@@ -357,7 +356,7 @@ class AlfrescoLaravelController extends Controller
     public function batch($id, Request $request){
         
         $folder=Alfresco::getObject($id);
-        $path=($folder->isBaseFolder())?'':$folder->path;
+        $path=$folder->path;
         $selected=json_decode($request->selected);
         
         

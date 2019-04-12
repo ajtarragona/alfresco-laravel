@@ -4,7 +4,6 @@ use Ajtarragona\AlfrescoLaravel\Models\AlfrescoObject;
 
 class AlfrescoFolder extends AlfrescoObject{
 
-	const OBJECT_TYPE = "cmis:folder";
 	
 	//private $cmisfolder;
 	//private $provider;
@@ -28,7 +27,7 @@ class AlfrescoFolder extends AlfrescoObject{
     }
 	
 	public function __construct() {
-		$this->type=self::OBJECT_TYPE;
+		
 	}
 	
 	
@@ -42,9 +41,9 @@ class AlfrescoFolder extends AlfrescoObject{
 	 */
 	public static function fromRestFolder($folder, $provider){
 		$f = new self();
-		$f->type="folder";
 		$f->provider($provider);
-		
+		$f->type=$provider::TYPE_FOLDER;
+
 		$f->id = $folder->id;
 		$f->name = $folder->name;
 		$f->description = isset($folder->properties->{'cm:description'})?$folder->properties->{'cm:description'}:'';
@@ -55,7 +54,7 @@ class AlfrescoFolder extends AlfrescoObject{
 		$f->parentId = $folder->parentId;
 		
 		$f->fullpath = $folder->path->name."/".$f->name;
-		$f->path = ltrim(substr( $f->fullpath , strlen($provider->getRootPath())),"/");
+		$f->path = $provider->getPath($f->fullpath);
 
 		
 		//$f->path = substr( $f->fullpath , strlen($provider->getBasepath(true)));
@@ -79,7 +78,8 @@ class AlfrescoFolder extends AlfrescoObject{
 		$folder = new self();
 		$folder->cmisfolder($cmisfolder);
 		$folder->provider($provider);
-			
+		$folder->type=$provider::TYPE_FOLDER;
+	
 
 		$folder->id = $cmisfolder->prop("objectId");
 		$folder->name = $cmisfolder->prop("name");
@@ -110,6 +110,12 @@ class AlfrescoFolder extends AlfrescoObject{
 	 */
 	public function getChildren($objectType=false,$page=1) {
 		return $this->provider()->getChildren($this->id,$objectType,$page);
+	}
+	public function getFolders($page=1) {
+		return $this->provider()->getFolders($this->id,$page);
+	}
+	public function getDocuments($page=1) {
+		return $this->provider()->getDocuments($this->id,$page);
 	}
 
 

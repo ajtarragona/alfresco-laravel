@@ -34,6 +34,10 @@ class AlfrescoRestProvider
     
     const PAGINATION_ITEMS = 100;    
 
+
+    const TYPE_FOLDER = "folder";
+    const TYPE_DOCUMENT = "document";
+
     //TODO view pagination
 
 
@@ -470,6 +474,14 @@ class AlfrescoRestProvider
 		}
 	}
 
+
+	
+	public function getFolders($folderId){
+		return $this->getChildren($folderId, self::TYPE_FOLDER);
+	}
+	public function getDocuments($folderId){
+		return $this->getChildren($folderId, self::TYPE_DOCUMENT);
+	}
 
 	/**
 	 * Retorna els fills d'una carpeta d'Alfresco passant el seu ID
@@ -928,7 +940,7 @@ class AlfrescoRestProvider
 
 	
 	public function getPath($path){
-		return str_replace_first( $this->getBasepath(true), "", $path );
+		return ltrim(substr( $path , strlen($this->rootpath)),"/");
 	}
 	
 	

@@ -1,6 +1,8 @@
 <?php
 namespace Ajtarragona\AlfrescoLaravel\Models;
 use Ajtarragona\AlfrescoLaravel\Models\Helpers\AlfrescoHelper;
+use Ajtarragona\AlfrescoLaravel\Models\AlfrescoCmisProvider;
+use Ajtarragona\AlfrescoLaravel\Models\AlfrescoRestProvider;
 
 abstract class AlfrescoObject {
 	
@@ -30,7 +32,7 @@ abstract class AlfrescoObject {
 	public abstract function moveToPath($parentPath);// throws AlfrescoObjectNotFoundException, RepositoryObjectAlreadyExistsException;
 	
 	public function isFolder() {
-		return $this->type == AlfrescoFolder::OBJECT_TYPE || $this->type =="folder";
+		return $this->type == AlfrescoCmisProvider::TYPE_FOLDER || $this->type == AlfrescoRestProvider::TYPE_FOLDER;
 	}
 	
 	public function isDocument(){ 

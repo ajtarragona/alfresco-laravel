@@ -33,6 +33,8 @@ class AlfrescoCmisProvider
     const REPEATED_OVERWRITE = "overwrite";
     const REPEATED_DENY = "deny" ;    
 
+    const TYPE_FOLDER = "cmis:folder";
+    const TYPE_DOCUMENT = "cmis:document";
 
 	
 	protected $rootpath;
@@ -81,7 +83,9 @@ class AlfrescoCmisProvider
 		
 		$this->connect();
 	}
-
+	public function getRootPath(){
+		return $this->rootpath;
+	}
 
 	/**
 	 * Realitza la connexió amb el repository Alfresco. Mètode d'ús intern
@@ -190,10 +194,10 @@ class AlfrescoCmisProvider
 
 		//dd($obj->type);
 		//System.out.println("["+ o.getName() + "] which is of type: " + type.getId()+"-"+type.getDisplayName());
-		if($obj->type == AlfrescoDocument::OBJECT_TYPE){
+		if($obj->type == self::TYPE_DOCUMENT){
 
 			return AlfrescoDocument::fromCmisDocument($obj, $this) ;
-		}else if($obj->type == AlfrescoFolder::OBJECT_TYPE || $obj->type == "F:st:sites"  || $obj->type =="F:st:site" ){
+		}else if($obj->type == self::TYPE_FOLDER || $obj->type == "F:st:sites"  || $obj->type =="F:st:site" ){
 			//dd($obj);
 			return AlfrescoFolder::fromCmisFolder($obj, $this);
 		}else return null;
@@ -447,6 +451,12 @@ class AlfrescoCmisProvider
 	}
 
 
+	public function getFolders($folderId){
+		return $this->getChildren($folderId, self::TYPE_FOLDER);
+	}
+	public function getDocuments($folderId){
+		return $this->getChildren($folderId, self::TYPE_DOCUMENT);
+	}
 	/**
 	 * Retorna els fills d'una carpeta d'Alfresco passant el seu ID
 	 * @param folderId
@@ -458,13 +468,13 @@ class AlfrescoCmisProvider
 		
 		try{
 			$children=$this->session->getChildren($folderId);
-			//dd($children);
+			//dump($children);
 			$ret=array();
 			if($children){
 				foreach($children->objectList as $obj){
 					
 					$child = $this->fromCmisObject($obj);
-					//dump($child);
+					
 					if($child){
 						if($objectType){
 							if($objectType==$child->type) $ret[]=$child;
@@ -497,18 +507,17 @@ class AlfrescoCmisProvider
 		//$folderName=AlfrescoHelper::sanitizeName($folderName);
 
 		try{
-			//RepositoryLog.debug("ALFRESCO: createFolder("+folderName+") in path " + parentfolder.getPath());
+			//dd("ALFRESCO: createFolder(".$folderName.") in folder " . $parentfolder->id);
 			$ret=$this->session->createFolder($parentfolder->id, $folderName);
 			
 			return $this->fromCmisObject($ret);
-		}catch(CmisRuntimeException | CmisConstraintException | CmisInvalidArgumentException $e){
-			
+		}catch(CmisRuntimeException | CmisInvalidArgumentException | CmisRuntimeException $e ){
 			//return $this->doCreateFolder(AlfrescoHelper::sanitizeName($folderName), $parentfolder);
 			//dd(AlfrescoHelper::sanitizeName($folderName));
 			$ret=$this->session->createFolder($parentfolder->id, AlfrescoHelper::sanitizeName($folderName));
 			return $this->fromCmisObject($ret);
 
-		}catch(CmisContentAlreadyExistsException $e){
+		}catch(CmisConstraintException | CmisContentAlreadyExistsException $e){
 			throw new AlfrescoObjectAlreadyExistsException(__("Folder ':name' already exists in folder ':path' in Alfresco ",array("name"=>$folderName, "path"=>$parentfolder->path)));
 		}catch(CmisObjectNotFoundException $e){
 			throw new AlfrescoObjectNotFoundException(__("Folder path ':name' not found in Alfresco",array("name"=>$parentfolder->path)));
@@ -650,7 +659,6 @@ class AlfrescoCmisProvider
 			if($obj->isDocument()){
 				//dd($obj->id);
 				$ret=$this->session->deleteObject($obj->id);
-				dd($ret);
 				return $ret==false;
 			}else{
 				$ret=$this->session->deleteTree($obj->id);
@@ -1042,7 +1050,9 @@ class AlfrescoCmisProvider
 
 	
 	public function getPath($path){
-		return str_replace_first( $this->getBasepath(true), "", $path );
+
+		return ltrim(substr( $path , strlen($this->rootpath)),"/");
+		//str_replace_first( $this->getBasepath(true), "", $path );
 	}
 	
 	
