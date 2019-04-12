@@ -30,7 +30,7 @@
                 "Ajtarragona\\AlfrescoLaravel\\AlfrescoLaravelServiceProvider"
             ],
             "aliases": {
-                "AccedeTercers" : "Ajtarragona\\AlfrescoLaravel\\Facades\\Alfresco"
+                "Alfresco" : "Ajtarragona\\AlfrescoLaravel\\Facades\\Alfresco"
         
             }
         }
