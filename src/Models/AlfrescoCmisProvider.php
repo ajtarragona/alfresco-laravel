@@ -1044,7 +1044,7 @@ class AlfrescoCmisProvider
 			}
 			return $ret;
 		}else{
-			$ret=$this->doUpload($parentId,$documents);
+			return $this->doUpload($parentId,$documents);
 		}
 		
 		return false;

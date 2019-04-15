@@ -115,7 +115,7 @@ class AlfrescoLaravelController extends Controller
 
     }
 
-    public function view($id)
+    public function viewDocument($id)
     {
         Alfresco::downloadObject($id,true);
 
