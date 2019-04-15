@@ -508,7 +508,17 @@ class AlfrescoCmisProvider
 
 		try{
 			//dd("ALFRESCO: createFolder(".$folderName.") in folder " . $parentfolder->id);
-			$ret=$this->session->createFolder($parentfolder->id, $folderName);
+			
+    		if(str_contains($folderName,"/")){
+
+    			$path=explode("/", $folderName);
+    			foreach($path as $part){
+    				$parentfolder = $this->doCreateFolder($part,$parentfolder);
+    			}
+    			$ret=$parentfolder;
+    		}else{
+				$ret=$this->session->createFolder($parentfolder->id, $folderName);
+			}
 			
 			return $this->fromCmisObject($ret);
 		}catch(CmisRuntimeException | CmisInvalidArgumentException | CmisRuntimeException $e ){
