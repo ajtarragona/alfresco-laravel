@@ -551,9 +551,23 @@ class AlfrescoRestProvider
 	 */
 	private function doCreateFolder($folderName, $parentfolder){ // throws AlfrescoObjectNotFoundException, AlfrescoObjectAlreadyExistsException{
 		//dump("doCreateFolder");
-			$folderName=AlfrescoHelper::sanitizeName($folderName);
 
-			$params=["name"=>$folderName, "nodeType"=>"cm:folder"];
+			if(str_contains($folderName,"/")){
+				$path_parts = pathinfo($folderName);
+				$relativePath = AlfrescoHelper::sanitizeDir($path_parts['dirname']);
+				$folderName = AlfrescoHelper::sanitizeName($path_parts['basename']);
+			}else{
+				$folderName=AlfrescoHelper::sanitizeName($folderName);
+			}
+
+			$params=[
+				"name"=>$folderName, 
+				"nodeType"=>"cm:folder"
+			];
+			
+			if(isset($relativePath)) $params["relativePath"]=$relativePath;
+
+
 			
 			$return=$this->call('POST','nodes/'.$parentfolder->id.'/children', [
 				'query' => ['include'=>'path'],
@@ -917,7 +931,7 @@ class AlfrescoRestProvider
 			}
 			return $ret;
 		}else{
-			$ret=$this->doUpload($parentId,$doc);
+			return $this->doUpload($parentId,$documents);
 		}
 		
 		return false;
