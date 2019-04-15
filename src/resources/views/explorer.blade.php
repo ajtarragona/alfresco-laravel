@@ -30,23 +30,23 @@
 
 		{{-- @dump($folder) --}}
 
-
-			
-		@if($children)
-			@include('alfresco::parts.searchform')
-			@include("alfresco::parts.table",['children'=>$children])
-		@else
-				<p class="lead">@lang("El directori <strong>:name</strong> està buit",["name"=>$folder->name])</p>
-				@if(!$folder->isBaseFolder())
-					@button(['href'=> route('alfresco.explorer',[$folder->getParent()->path]),'style'=>'light','size'=>'sm'])
-						@icon('angle-left') @lang("Tornar enrera")
-					@endbutton
-				@endif	
+		<div class="pt-3">
 				
+			@if($children)
+				@include('alfresco::parts.searchform')
+				@include("alfresco::parts.table",['children'=>$children])
+			@else
+					<p class="lead">@lang("El directori <strong>:name</strong> està buit",["name"=>$folder->name])</p>
+					@if(!$folder->isBaseFolder())
+						@button(['href'=> route('alfresco.explorer',[$folder->getParent()->path]),'style'=>'light','size'=>'sm'])
+							@icon('angle-left') @lang("Tornar enrera")
+						@endbutton
+					@endif	
+					
 
-			
-		@endif
-		
+				
+			@endif
+		</div>
 
 @endsection
 

@@ -510,17 +510,27 @@ class AlfrescoCmisProvider
 			//dd("ALFRESCO: createFolder(".$folderName.") in folder " . $parentfolder->id);
 			
     		if(str_contains($folderName,"/")){
+    			//si tiene subdirectorios
 
     			$path=explode("/", $folderName);
+    			$partpath="";
     			foreach($path as $part){
-    				$parentfolder = $this->doCreateFolder($part,$parentfolder);
+    				$partpath.="/".$part;
+    				//dump($partpath);
+					try{
+    					$parentfolder=$this->getFolderByPath($partpath);
+    				}catch(AlfrescoObjectNotFoundException $e){
+    					//dd($e);
+    					$parentfolder=$this->doCreateFolder($part, $parentfolder);
+    				}
     			}
-    			$ret=$parentfolder;
+    			return $parentfolder;
     		}else{
 				$ret=$this->session->createFolder($parentfolder->id, $folderName);
+
+				return $this->fromCmisObject($ret);
 			}
 			
-			return $this->fromCmisObject($ret);
 		}catch(CmisRuntimeException | CmisInvalidArgumentException | CmisRuntimeException $e ){
 			//return $this->doCreateFolder(AlfrescoHelper::sanitizeName($folderName), $parentfolder);
 			//dd(AlfrescoHelper::sanitizeName($folderName));

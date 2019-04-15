@@ -854,11 +854,11 @@ xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/">
         }
         if (!isset ($hash_values['title']))
         {
-            $hash_values['title'] = preg_replace("/[^A-Za-z0-9\s.&; ]/", '', htmlentities($objectName));
+            $hash_values['title'] = preg_replace("/[^A-Za-z0-9\s.&; -_]/", '', htmlentities($objectName));
         }
         if (!isset ($hash_values['summary']))
         {
-            $hash_values['summary'] = preg_replace("/[^A-Za-z0-9\s.&; ]/", '', htmlentities($objectName));
+            $hash_values['summary'] = preg_replace("/[^A-Za-z0-9\s.&; -_]/", '', htmlentities($objectName));
         }
         $post_value = CmisRepositoryWrapper :: processTemplate($entry_template, $hash_values);
         $ret = $this->doPost($myURL, $post_value, self::MIME_ATOM_XML_ENTRY);

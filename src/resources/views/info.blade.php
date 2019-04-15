@@ -43,38 +43,40 @@
 
 
 @section('body')
-	<p class="lead">{!! $object->renderIcon() !!}{{ $object->name }}</p>
+	<div class="pt-3">
+		<p class="lead">{!! $object->renderIcon() !!}{{ $object->name }}</p>
 	
-		@button(['href'=> route('alfresco.explorer',[$object->isDocument()?$object->getParent()->path:$object->path]),'style'=>'light','size'=>'sm'])
-			@icon('angle-left') @lang("Tornar enrera")
-		@endbutton
+			@button(['href'=> route('alfresco.explorer',[$object->isDocument()?$object->getParent()->path:$object->path]),'style'=>'light','size'=>'sm'])
+				@icon('angle-left') @lang("Tornar enrera")
+			@endbutton
 
-	@row(['class'=>'mt-3'])
-		@col(['size'=>6])
-			<table class="table table-bordered table-sm" >
-				@foreach($attributes as $name=>$value)
-				<tr>
-					<th>{{ $name}}</th>
-					<td>{!! makeLinks($value) !!}</td>
-				</tr>
-				@endforeach
-			</table>
-		@endcol
-
-		@if($object->isImage())
+		@row(['class'=>'mt-3'])
 			@col(['size'=>6])
-				<figure>
-					<img src="{{$object->viewurl}}" class="img-fluid"/>
-				</figure>
+				<table class="table table-bordered table-sm" >
+					@foreach($attributes as $name=>$value)
+					<tr>
+						<th>{{ $name}}</th>
+						<td>{!! makeLinks($value) !!}</td>
+					</tr>
+					@endforeach
+				</table>
 			@endcol
 
-		@elseif($object->hasPreview())
-			@col(['size'=>6])
-				<iframe src="{{$object->viewurl}}" class="previewiframe"></iframe>
-			@endcol
-		@endif
+			@if($object->isImage())
+				@col(['size'=>6])
+					<figure>
+						<img src="{{$object->viewurl}}" class="img-fluid"/>
+					</figure>
+				@endcol
 
-	@endrow
+			@elseif($object->hasPreview())
+				@col(['size'=>6])
+					<iframe src="{{$object->viewurl}}" class="previewiframe"></iframe>
+				@endcol
+			@endif
+
+		@endrow
+	</div>
 @endsection
 
 
