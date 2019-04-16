@@ -133,7 +133,7 @@ class AlfrescoDocument extends AlfrescoObject {
 		//_dump($provider);
 
 		$doc->downloadurl = $provider->getDownloadUrl($doc); //($cmisdocument->getContentUrl());
-		$doc->viewurl = $provider->getViewUrl($doc); //($cmisdocument->getContentUrl());
+		$doc->viewurl = $provider->getPreviewUrl($doc); //($cmisdocument->getContentUrl());
 
 		$doc->mimetype =  $cmisdocument->prop("contentStreamMimeType");
 		$doc->mimetypedescription = AlfrescoHelper::getShortType($doc->mimetype);

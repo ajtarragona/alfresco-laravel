@@ -68,7 +68,7 @@ class AlfrescoHelper{
 
 		return in_array($mimetype, $valid);
 	}
-	
+
 	public static function getColor($mimetype){
 		$colors=array(
 			"application/msword"=>"#3E6DB5",
@@ -345,5 +345,24 @@ class AlfrescoHelper{
 
 	}
 
+	public static function download($contents, $name, $mime, $size, $stream=false){
+		header("Pragma: public");
+		header("Expires: -1");
+		header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
+		
+		if (!$stream){
+			header("Content-Disposition: attachment; filename=\"".$name."\"");
+		}else{
+			header("Content-Disposition: inline; filename=\"".$name."\"");
+		}
+		
+		header("Content-Type: " . $mime);
+		header("Content-Length: ".$size);
+		
+		print $contents;
+		ob_flush();
+		flush();
+		exit;
+	}
 
 }

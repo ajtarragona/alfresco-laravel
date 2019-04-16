@@ -366,28 +366,9 @@ class AlfrescoRestProvider
 	 */
 	public function downloadObject($objectId, $stream=false){
 		$obj=$this->getObject($objectId);
-		$is_attachment = !$stream;
 		
 		if($obj->isDocument()){
-			header("Pragma: public");
-			header("Expires: -1");
-			header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
-			
-			if ($is_attachment){
-				header("Content-Disposition: attachment; filename=\"".$obj->name."\"");
-			}else{
-				header("Content-Disposition: inline; filename=\"".$obj->name."\"");
-			}
-			
-			header("Content-Type: " . $obj->mimetype);
-			header("Content-Length: ".$obj->size);
-			
-			$doc= $this->getDocumentContent($objectId);
-			print $doc;
-			ob_flush();
-			flush();
-			exit;
-
+			AlfrescoHelper::download($contents, $obj->name, $obj->mimetype, $obj->size, $stream);
 		}else{
 
 			
@@ -1068,7 +1049,7 @@ class AlfrescoRestProvider
 
 
     public function getPreview($id, $type="pdf"){
-    	
+
     	try{
     		$object=$this->getDocument($id);
     		
@@ -1091,21 +1072,7 @@ class AlfrescoRestProvider
 				}
 
 				if(isset($content) && $content){
-	 				header("Pragma: public");
-					header("Expires: -1");
-					header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
-					
-					header("Content-Disposition: inline; filename=\"".$object->name."\"");
-					
-					
-					header("Content-Type: " . $mime);
-					header("Content-Length: ".$size);
-					
-					print $content;
-
-					ob_flush();
-					flush();
-					exit;
+	 				AlfrescoHelper::download($content, $object->name, $mime, $size, true);
 				}
 		 	}
 	 		return false;

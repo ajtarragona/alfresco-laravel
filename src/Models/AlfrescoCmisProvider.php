@@ -191,10 +191,10 @@ class AlfrescoCmisProvider
 	protected function fromCmisObject($o){
 		//dump($o);
 		$obj=new AlfrescoCmisObject($o);
-
+		//dd($obj);
 		//dd($obj->type);
 		//System.out.println("["+ o.getName() + "] which is of type: " + type.getId()+"-"+type.getDisplayName());
-		if($obj->type == self::TYPE_DOCUMENT){
+		if($obj->type == self::TYPE_DOCUMENT || $obj->type=="D:cm:thumbnail"){
 
 			return AlfrescoDocument::fromCmisDocument($obj, $this) ;
 		}else if($obj->type == self::TYPE_FOLDER || $obj->type == "F:st:sites"  || $obj->type =="F:st:site" ){
@@ -252,6 +252,7 @@ class AlfrescoCmisProvider
 
 		try{
 			$tmp= $this->session->getObject($objectId);
+			//dd($tmp);
 			$ret=$this->fromCmisObject($tmp);
 			
 			$this->checkInBaseFolder($ret);
@@ -327,28 +328,11 @@ class AlfrescoCmisProvider
 	 */
 	public function downloadObject($objectId, $stream=false){
 		$obj=$this->getObject($objectId);
-		$is_attachment = !$stream;
 		
 		if($obj->isDocument()){
-			header("Pragma: public");
-			header("Expires: -1");
-			header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
-			
-			if ($is_attachment){
-				header("Content-Disposition: attachment; filename=\"".$obj->name."\"");
-			}else{
-				header("Content-Disposition: inline; filename=\"".$obj->name."\"");
-			}
-			
-			header("Content-Type: " . $obj->mimetype);
-			header("Content-Length: ".$obj->size);
-			
 			$doc= $this->getDocumentContent($objectId);
-			print $doc;
-			ob_flush();
-			flush();
-			exit;
-
+			AlfrescoHelper::download($doc, $obj->name, $obj->mimetype, $obj->size, $stream);
+		
 		}else{
 			$descendants=$this->session->getDescendants($obj->id,-1);
 			
@@ -1197,8 +1181,47 @@ class AlfrescoCmisProvider
         $this->repeatedPolicy == self::REPEATED_DENY;
     }
     	
-    public function getPreview($id){
-    	return false;
+    public function getPreview($id, $type="pdf"){
+    	try{
+    		$obj=$this->getDocument($id);
+    		if($obj->isFile()){
+	    		if($obj->isPdf() || $obj->isImage()){
+	    			$content=$obj->getContent();
+	    			$mime=$obj->mimetype;
+	    			$size=$obj->size;
+	    		}else{
+		    		$ret=$this->session->getRenditions($id);
+
+			    	if($ret && $ret->renditions ){
+			    		$renditions=collect($ret->renditions);
+			    		//dd($renditions);
+			    		
+			    		if($renditions->where('title',$type)->count()>0){
+			    			$rendition=$renditions->where('title',$type)->first();
+			    			$content=$this->session->getContentStream($rendition["streamId"]);
+			    			$mime=$rendition["mimetype"];
+							$size=$rendition["length"];
+
+			    		}else{
+			    			
+				    		if($renditions->where('title',"doclib")->count()>0){
+				    			$rendition=$renditions->where('title',"doclib")->first();
+				    			$content=$this->session->getContentStream($rendition["streamId"]);
+				    			$mime=$rendition["mimetype"];
+								$size=$rendition["length"];
+							}
+			    		}
+			    	}
+			    }
+
+				if(isset($content) && $content){
+	 				AlfrescoHelper::download($content, $obj->name, $mime, $size, true);
+			    }
+			}
+	    	return false;
+	    }catch(Exception $e){
+	 		return false;
+	 	}
     }
 	
 

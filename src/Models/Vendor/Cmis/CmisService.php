@@ -795,7 +795,7 @@ xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/">
 	public function getRenditions($objectId, $options = array (
 		self::OPT_RENDITION_FILTER => "*"
 	)) {
-		return getObject($objectId, $options);
+		return $this->getObject($objectId, $options);
 	}
 
 	/**
