@@ -413,4 +413,9 @@ class AlfrescoService
 	
 
 
+	public function getPreview($id, $type="pdf"){
+		return $this->provider->getPreview($id, $type);
+	}
+
+
 }

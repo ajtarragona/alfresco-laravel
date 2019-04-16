@@ -121,6 +121,13 @@ class AlfrescoLaravelController extends Controller
 
     }
 
+
+    public function previewDocument($id)
+    {
+        Alfresco::getPreview($id);
+
+    }
+
     public function info($id)
     {
         $object=Alfresco::getObject($id);

@@ -85,8 +85,12 @@ abstract class AlfrescoObject {
 	public function isImage(){
 		return ($this->isFile() && AlfrescoHelper::isImage($this->mimetype));
 	}
+
+	public function isPdf(){
+		return ($this->isFile() && AlfrescoHelper::isPdf($this->mimetype));
+	}
 	public function hasPreview(){
-		return ($this->isFile() && AlfrescoHelper::hasPreview($this->mimetype));
+		return true; //($this->isFile() && AlfrescoHelper::hasPreview($this->mimetype));
 	}
 
 	

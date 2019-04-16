@@ -1153,6 +1153,13 @@ class AlfrescoCmisProvider
 		
     }
 
+    /*return the user preview url of a file */
+    public function getPreviewUrl($object){
+        return route('alfresco.preview',[$object->id]);
+		
+    }
+
+
 
     public function getRepeatedPolicy() {
         return $this->repeatedPolicy;
@@ -1190,6 +1197,9 @@ class AlfrescoCmisProvider
         $this->repeatedPolicy == self::REPEATED_DENY;
     }
     	
+    public function getPreview($id){
+    	return false;
+    }
 	
 
 

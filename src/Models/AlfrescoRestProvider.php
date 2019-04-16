@@ -134,8 +134,8 @@ class AlfrescoRestProvider
 		try{
 			$response = $this->client->request($method, $url, $args);
 			// dump($response->getStatusCode());
-			// dump($response);
-			// dump((string)$response->getBody());
+			//dump($response);
+			//dd((string)$response->getBody());
 
 			switch($response->getStatusCode()){
 				case 200:
@@ -143,9 +143,10 @@ class AlfrescoRestProvider
 				case 204:
 					//ok
 					$ret = (string) $response->getBody();
-					//dump($ret);
+					//dd($ret);
 					if(isJson($ret)){
 						$ret=json_decode($ret);
+						//dump($ret);
 					}else if(!$ret){
 						$ret=true;
 					}
@@ -846,7 +847,12 @@ class AlfrescoRestProvider
 				[
 		            'name'     => 'overwrite',
 		            'contents' => $this->isRepeatedOverwrite()?"true":"false"
+		        ],
+		        [
+		            'name'     => 'renditions',
+		            'contents' => 'pdf'
 		        ]
+		        
 		        
 
 			]
@@ -1017,6 +1023,11 @@ class AlfrescoRestProvider
         return route('alfresco.view',[$object->id]);
 		
     }
+	/*return the user preview url of a file */
+    public function getPreviewUrl($object){
+        return route('alfresco.preview',[$object->id]);
+		
+    }
 
 
     public function getRepeatedPolicy() {
@@ -1053,9 +1064,62 @@ class AlfrescoRestProvider
     
     public function isRepeatedDeny() {
         $this->repeatedPolicy == self::REPEATED_DENY;
+    } 
+
+
+    public function getPreview($id, $type="pdf"){
+    	
+    	try{
+    		$object=$this->getDocument($id);
+    		
+	    	if($object->isFile()){
+	    		if($object->isPdf() || $object->isImage()){
+	    			$content=$object->getContent();
+	    			$mime=$object->mimetype;
+	    			$size=$object->size;
+	    		}else{
+		 			
+		 			$response=$this->call('GET','nodes/'.$id.'/renditions/'.$type);
+
+		 			
+			 		if($response && $response->entry && $response->entry->status=="CREATED"){
+
+						$content=$this->call('GET','nodes/'.$id.'/renditions/'.$type.'/content');
+			 			$mime=$response->entry->content->mimeType;
+	    				$size=$response->entry->content->sizeInBytes;
+			 		}
+				}
+
+				if(isset($content) && $content){
+	 				header("Pragma: public");
+					header("Expires: -1");
+					header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
+					
+					header("Content-Disposition: inline; filename=\"".$object->name."\"");
+					
+					
+					header("Content-Type: " . $mime);
+					header("Content-Length: ".$size);
+					
+					print $content;
+
+					ob_flush();
+					flush();
+					exit;
+				}
+		 	}
+	 		return false;
+
+	 	}catch(Exception $e){
+	 		return false;
+	 	}
+
+ 			
+
+
     }
     	
-	
+		
 
 
 }

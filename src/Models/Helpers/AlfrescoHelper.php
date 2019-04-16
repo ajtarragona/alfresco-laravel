@@ -60,6 +60,15 @@ class AlfrescoHelper{
 
 		return in_array($mimetype, $valid);
 	}
+
+	public static function isPdf($mimetype){
+		$valid=[
+			'application/pdf'
+		];
+
+		return in_array($mimetype, $valid);
+	}
+	
 	public static function getColor($mimetype){
 		$colors=array(
 			"application/msword"=>"#3E6DB5",

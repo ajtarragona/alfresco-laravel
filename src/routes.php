@@ -7,6 +7,8 @@ Route::group(['prefix' => 'ajtarragona/alfresco','middleware' => ['web','auth','
 	Route::get('download/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@download')->name("alfresco.download");
 
 	Route::get('view/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@viewDocument')->name("alfresco.view");
+	
+	Route::get('preview/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@previewDocument')->name("alfresco.preview");
 
 
 	Route::delete('delete/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@delete')->name("alfresco.delete");

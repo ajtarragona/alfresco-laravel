@@ -77,7 +77,8 @@ class AlfrescoDocument extends AlfrescoObject {
 		//_dump($provider);
 
 		$doc->downloadurl = $provider->getDownloadUrl($doc); //($cmisdocument->getContentUrl());
-		$doc->viewurl = $provider->getViewUrl($doc); //($cmisdocument->getContentUrl());
+		$doc->viewurl = $provider->getPreviewUrl($doc); //($cmisdocument->getContentUrl());D
+		//$doc->previewurl = $provider->getPreviewUrl($doc); //($cmisdocument->getContentUrl());D
 
 		$doc->mimetype =  $document->content->mimeType;
 		$doc->mimetypedescription = $document->content->mimeTypeName;
@@ -225,6 +226,14 @@ class AlfrescoDocument extends AlfrescoObject {
 	 */
 	public function getContent() {
 		return $this->provider()->getDocumentContent($this->id);
+	}
+
+
+	/**
+	 * Retorna la vista previa de l'arxiu
+	 */
+	public function getPreview($type="pdf") {
+		return $this->provider()->getPreview($this->id, $type);
 	}
 	
 
