@@ -368,6 +368,7 @@ class AlfrescoRestProvider
 		$obj=$this->getObject($objectId);
 		
 		if($obj->isDocument()){
+			$contents= $this->getDocumentContent($objectId);
 			AlfrescoHelper::download($contents, $obj->name, $obj->mimetype, $obj->size, $stream);
 		}else{
 
