@@ -51,6 +51,10 @@ class AlfrescoLaravelController extends Controller
 
 
     public function explorer($path=false, Request $request){
+        
+        if(!config('alfresco.explorer')){
+            return response("Oops! Alfresco Explorer is disabled", 403);
+        }
         //dd($path);
         try{
 

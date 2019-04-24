@@ -43,6 +43,7 @@ Route::group(['prefix' => 'ajtarragona/alfresco','middleware' => ['web','auth','
 
 	Route::get('tree/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@tree')->name("alfresco.tree");
 
-
+	
 	Route::get('/explorer/{folder?}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@explorer')->name("alfresco.explorer")->where('folder', '(.*)');
+	
 });

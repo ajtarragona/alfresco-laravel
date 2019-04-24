@@ -14,5 +14,6 @@ return [
 	'pass' => env('ALFRESCO_PASSWORD','admin'), //Password to access alfresco
 	'repeated_policy' => env('ALFRESCO_REPEATED_POLICY','rename'), //rename or overwrite
 	'debug' => env('ALFRESCO_DEBUG',false), //rename or overwrite
+	'explorer' => env('ALFRESCO_EXPLORER',false),
 ];
 
