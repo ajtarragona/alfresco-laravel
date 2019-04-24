@@ -51,6 +51,9 @@ class AlfrescoLaravelServiceProvider extends ServiceProvider
     {
         //$this->app->make('Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController');
         //$this->app->make('Ajtarragona\AlfrescoLaravel\Models\AlfrescoLaravel');
+        
+        //registro middleware
+        $this->app['router']->aliasMiddleware('alfresco-explorer', \Ajtarragona\AlfrescoLaravel\Middlewares\AlfrescoExplorer::class);
 
         $this->app->bind('alfresco', function(){
             return new \Ajtarragona\AlfrescoLaravel\Models\AlfrescoService;

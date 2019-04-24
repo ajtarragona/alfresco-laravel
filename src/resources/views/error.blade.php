@@ -7,10 +7,10 @@
 
 
 @section('body')
-		@container(['fluid'=>false])
-			@alert(['type'=>'danger','class'=>'mt-5'])
-				{!! $error !!}
-			@endalert
-		@endcontainer
-
+		
+			@container(['fluid'=>false,'class'=>'pt-5'])
+				@alert(['type'=>'danger'])
+					{!! $error !!}
+				@endalert
+			@endcontainer
 @endsection
