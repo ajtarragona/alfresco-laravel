@@ -16,12 +16,14 @@ abstract class AlfrescoObject {
 	public $updated;
 	public $downloadurl;
 	
-	public $description;
 	
 	public $createdBy;
 	public $updatedBy;
 
-	
+	public $metadata;
+		//public $description;
+
+	protected $excluded = ["fullpath"];
 	
 	public abstract function delete();
 	public abstract function rename($newName);// throws AlfrescoObjectAlreadyExistsException;

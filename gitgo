@@ -1,0 +1,37 @@
+#! /bin/bash
+
+git add .
+
+msg="no message set"
+
+if [ ! "$#" -gt 0 ]; then
+	read -p 'Enter the commit message: ' msg
+else
+	msg=$1
+fi
+
+if [  -z "$msg" ]; then
+	echo "Message is required"
+	exit
+fi
+
+#hago el commit
+git commit -am "$msg"
+
+current=`git describe --tags --abbrev=0`
+newversion="1.0.0"
+
+#si existe el fichero .version, cojo la version de ahi
+if [ -f ".version" ]; then
+	newversion="`cat .version`"
+fi
+
+
+#si la version es diferente al tag actual de git, añado el tag
+if [ "$newversion" != "$current" ]; then
+     git tag -a "$newversion" -m "`git log -1 --format=%s`"
+     echo "Created a new tag, $newversion"
+	 git push && git push --tags
+else
+	git push
+fi
