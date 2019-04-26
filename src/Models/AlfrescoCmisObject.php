@@ -13,7 +13,7 @@ class AlfrescoCmisObject{
 
 	}
 
-	public function prop($name,$prefix=false){
+	public function prop($name, $prefix=false){
 		if(!$this->cmisobject) return "";
 		if(!isset($this->cmisobject->properties)) return "";
 		$prefix=$prefix?($prefix.":"):$this->prefix;

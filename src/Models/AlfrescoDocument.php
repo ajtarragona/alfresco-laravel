@@ -52,6 +52,8 @@ class AlfrescoDocument extends AlfrescoObject {
 	public static function fromRestDocument($document, $provider){
 		$doc = new self();
 		$doc->provider($provider);
+		//dump($document);
+		
 		$doc->type=$provider::TYPE_DOCUMENT;
 
 		$doc->id = $document->id;
@@ -98,7 +100,7 @@ class AlfrescoDocument extends AlfrescoObject {
 	public static function fromCmisDocument($cmisdocument, $provider){
 		//dump($cmisdocument);
 		$doc = new self();
-		
+		//dump($cmisdocument);
 		$doc->cmisdocument($cmisdocument);
 		$doc->provider($provider);
 		$doc->type=$provider::TYPE_DOCUMENT;

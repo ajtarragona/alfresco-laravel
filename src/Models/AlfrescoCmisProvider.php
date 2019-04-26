@@ -6,7 +6,7 @@ use Illuminate\Http\UploadedFile;
 
 use Ajtarragona\AlfrescoLaravel\Models\Vendor\Zip\TbsZip;
 
-use Ajtarragona\AlfrescoLaravel\Models\Vendor\Cmis\CMISService;
+use Ajtarragona\AlfrescoLaravel\Models\Vendor\Cmis\CmisService;
 use Ajtarragona\AlfrescoLaravel\Models\Vendor\Cmis\Exceptions\CmisInvalidArgumentException;
 use Ajtarragona\AlfrescoLaravel\Models\Vendor\Cmis\Exceptions\CmisObjectNotFoundException;
 use Ajtarragona\AlfrescoLaravel\Models\Vendor\Cmis\Exceptions\CmisPermissionDeniedException;
@@ -98,7 +98,7 @@ class AlfrescoCmisProvider
 			
 			if($this->debug) Log::debug("ALFRESCO: Connecting to CMIS API:" .$apiurl);
 			
-			$this->session = new CMISService($apiurl, $this->apiuser, $this->apipwd);
+			$this->session = new CmisService($apiurl, $this->apiuser, $this->apipwd);
 
 			$ret=$this->session->getObjectByPath($this->getBasepath(true));
 			
