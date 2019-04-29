@@ -52,11 +52,13 @@
 
 		@row(['class'=>'mt-3'])
 			@col(['size'=>6])
+				{{-- @dump($object->properties) --}}
+				
 				<table class="table table-bordered table-sm" >
 					@foreach($attributes as $name=>$value)
 					<tr>
-						<th>{{ $name}}</th>
-						<td>{!! makeLinks($value) !!}</td>
+						<th>{{ $name }}</th>
+						<td>{!! $value !!}</td>
 					</tr>
 					@endforeach
 				</table>

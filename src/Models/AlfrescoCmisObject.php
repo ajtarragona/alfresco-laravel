@@ -13,6 +13,9 @@ class AlfrescoCmisObject{
 
 	}
 
+	public function props(){
+		return $this->cmisobject->properties;
+	}
 	public function prop($name, $prefix=false){
 		if(!$this->cmisobject) return "";
 		if(!isset($this->cmisobject->properties)) return "";

@@ -13,9 +13,9 @@ class AlfrescoDocument extends AlfrescoObject {
 	public $size;
 	public $humansize;
 
-	public $version;
-	public $author;
-	public $title;
+	// public $version;
+	// public $author;
+	// public $title;
 
 
 	public function cmisdocument($newcmisdocument = null)
@@ -58,12 +58,18 @@ class AlfrescoDocument extends AlfrescoObject {
 
 		$doc->id = $document->id;
 		$doc->name = $document->name;
-		$doc->description = isset($document->properties->{'cm:description'})?$document->properties->{'cm:description'}:'';
-		$doc->title = isset($document->properties->{'cm:title'})?$document->properties->{'cm:title'}:'';
 		$doc->createdBy = $document->createdByUser->id;
 		$doc->updatedBy = $document->modifiedByUser->id;
-		$doc->version = isset($document->properties->{'cm:versionLabel'})?$document->properties->{'cm:versionLabel'}:'';
-		$doc->author = isset($document->properties->{'cm:author'})?$document->properties->{'cm:author'}:'';
+		
+		// dump($document);
+		$doc->setProperties(isset($document->properties)?$document->properties:[]);
+		
+		// $doc->setProperty("description", isset($document->properties->{'cm:description'})?$document->properties->{'cm:description'}:'');
+
+		// $doc->setProperty("title",isset($document->properties->{'cm:title'})?$document->properties->{'cm:title'}:'');
+
+		// $doc->setProperty("version", isset($document->properties->{'cm:versionLabel'})?$document->properties->{'cm:versionLabel'}:'');
+		// $doc->setProperty("author", isset($document->properties->{'cm:author'})?$document->properties->{'cm:author'}:'');
 
 
 		$doc->extension = AlfrescoHelper::getExtension($doc->name);
@@ -100,7 +106,6 @@ class AlfrescoDocument extends AlfrescoObject {
 	public static function fromCmisDocument($cmisdocument, $provider){
 		//dump($cmisdocument);
 		$doc = new self();
-		//dump($cmisdocument);
 		$doc->cmisdocument($cmisdocument);
 		$doc->provider($provider);
 		$doc->type=$provider::TYPE_DOCUMENT;
@@ -108,12 +113,14 @@ class AlfrescoDocument extends AlfrescoObject {
 		$doc->id = $cmisdocument->prop("objectId");
 		//$doc->id = explode(";", $doc->id)[0]; //removes version
 		$doc->name = $cmisdocument->prop("name");
-		$doc->description = $cmisdocument->prop("description","cm");
-		$doc->title = $cmisdocument->prop("title","cm");
 		$doc->createdBy = $cmisdocument->prop("createdBy");
 		$doc->updatedBy = $cmisdocument->prop("lastModifiedBy");
-		$doc->version = $cmisdocument->prop("versionLabel");
-		$doc->author = $cmisdocument->prop("author","cm");
+		
+		$doc->setProperties($cmisdocument->props());
+		// $doc->setProperty("description",  $cmisdocument->prop("description","cm"));
+		// $doc->setProperty("title",  $cmisdocument->prop("title","cm"));
+		// $doc->setProperty("version",  $cmisdocument->prop("versionLabel"));
+		// $doc->setProperty("author",  $cmisdocument->prop("author","cm"));
 
 
 		$doc->extension = AlfrescoHelper::getExtension($doc->name);

@@ -134,9 +134,8 @@ class AlfrescoLaravelController extends Controller
     {
         $object=Alfresco::getObject($id);
         //dd($object);
-        $attributes=get_object_vars($object);
-        ksort($attributes);
-
+        $attributes=$object->getAttributes();
+       
         $breadcrumb=$this->makeBreadcrumb($object);
         $params=compact("object","breadcrumb",'attributes');
 

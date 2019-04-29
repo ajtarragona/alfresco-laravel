@@ -20,10 +20,47 @@ abstract class AlfrescoObject {
 	public $createdBy;
 	public $updatedBy;
 
-	public $metadata;
+	public $properties;
 		//public $description;
 
-	protected $excluded = ["fullpath"];
+	protected $hidden = ["fullpath","properties"];
+
+	public function getAttributes(){
+		$attributes=get_object_public_vars($this);
+		$ret=[];
+		foreach($attributes as $key=>$value){
+			if(!in_array($key, $this->hidden)) $ret[$key]=makeLinks($value);
+		} 
+		ksort($ret);
+		return $ret;
+	}
+
+	public function setProperty($key,$value){
+		$this->properties[$key]=$value;
+	}
+
+	public function setProperties($properties){
+		//$this->properties=$properties;
+
+		$separator=":";
+		//dd($properties);
+		
+		$arr=[];
+		// dump($properties);
+		if(is_object($properties)) $properties=to_array($properties);
+		//dump($properties);
+		if($properties && is_array($properties)){
+			foreach($properties as $key=>$property){
+				path_to_array($arr,$key,$property,":");
+			}
+		}
+		$this->properties=$arr;
+	}
+	
+
+	public function getProperty($key){
+		if($this->properties && isset($this->properties[$key])) return $this->properties[$key];
+	}
 	
 	public abstract function delete();
 	public abstract function rename($newName);// throws AlfrescoObjectAlreadyExistsException;
