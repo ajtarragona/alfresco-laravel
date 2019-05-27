@@ -4,7 +4,8 @@ namespace Ajtarragona\AlfrescoLaravel\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Alfresco;
+//use Alfresco;
+use Ajtarragona\AlfrescoLaravel\Facades\Alfresco;
 use Ajtarragona\AlfrescoLaravel\Exceptions\AlfrescoConnectionException;
 use Ajtarragona\AlfrescoLaravel\Exceptions\AlfrescoObjectAlreadyExistsException;
 use Ajtarragona\AlfrescoLaravel\Models\Helpers\AlfrescoHelper;
