@@ -2,7 +2,7 @@
 
 namespace Ajtarragona\AlfrescoLaravel\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Alfresco;
 use Ajtarragona\AlfrescoLaravel\Exceptions\AlfrescoConnectionException;
