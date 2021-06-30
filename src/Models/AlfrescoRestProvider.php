@@ -144,7 +144,7 @@ class AlfrescoRestProvider
 					//ok
 					$ret = (string) $response->getBody();
 					//dd($ret);
-					if(isJson($ret)){
+					if(is_object(json_decode($ret))){
 						$ret=json_decode($ret);
 						//dump($ret);
 					}else if(!$ret){
