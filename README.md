@@ -138,7 +138,7 @@ ALFRESCO_DEBUG = true
 a l'arxiu `.env`, podem accedir a un *file-explorer* a la ruta: 
 `/ajtarragona/alfresco/explorer`
 
-És una ruta securitzada i només s'hi podrà accedir si habilitem l'autenticació a la nostra aplicació Laravel.
+> Aquesta funcionalitat requereixen el paquet **web-components**: <br><br>[https://github.com/ajtarragona/web-components](https://github.com/ajtarragona/web-components)<br><br>És una ruta securitzada i només s'hi podrà accedir si habilitem l'autenticació a la nostra aplicació Laravel.
 
 
 
