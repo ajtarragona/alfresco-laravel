@@ -130,7 +130,7 @@ Funció | Descripció | Paràmetres | Retorn | Excepcions
 
 
 <a name="explorador"></a>
-### Explorador d'arxius
+## Explorador d'arxius
 Si habilitem  el paràmetre: 
 ```
 ALFRESCO_DEBUG = true 
