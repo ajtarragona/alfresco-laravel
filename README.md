@@ -94,7 +94,7 @@ public  function  test(){
   
   
 
-### Funcions
+## Funcions
 
 Funció | Descripció | Paràmetres | Retorn | Excepcions
 --- | --- | --- | --- | ---
