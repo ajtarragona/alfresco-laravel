@@ -53,6 +53,7 @@ class AlfrescoRestProvider
 	protected $reponame;
 	protected $session;
 	protected $debug;
+	protected $verify_ssl;
 
 
 	
@@ -84,6 +85,7 @@ class AlfrescoRestProvider
 		
 		$this->repeatedPolicy = $settings->repeated_policy;
 		$this->debug = $settings->debug;
+		$this->verify_ssl = $settings->verify_ssl;
 
 		
 		$this->connect();
@@ -101,7 +103,7 @@ class AlfrescoRestProvider
 
 		$this->client = new Client([
 			'base_uri' => $apiurl,
-			'verify' =>false
+			'verify' => $this->verify_ssl
 		]);
 	}
 
@@ -186,7 +188,7 @@ class AlfrescoRestProvider
 
 		    Log::error("Error connecting to Alfresco server");
 			Log::error($e->getMessage());
-			dd($e);
+			// dd($e);
 			throw new AlfrescoConnectionException(__("Error connecting to Alfresco server"));
 		}
 		

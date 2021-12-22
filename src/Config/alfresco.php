@@ -15,5 +15,6 @@ return [
 	'repeated_policy' => env('ALFRESCO_REPEATED_POLICY','rename'), //rename or overwrite
 	'debug' => env('ALFRESCO_DEBUG',false), //rename or overwrite
 	'explorer' => env('ALFRESCO_EXPLORER',false),
+	'verify_ssl' => env('ALFRESCO_VERIFY_SSL',false),
 ];
 

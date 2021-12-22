@@ -28,7 +28,8 @@ ALFRESCO_USER  | Usuari |
 ALFRESCO_PASSWORD  | Password | --- 
 ALFRESCO_DEBUG  | Mode debug (habilita més logs) | `true` / `false`
 ALFRESCO_REPEATED_POLICY  | Política a seguir en cas de pujar un arxiu repetit | `rename` / `overwrite` / `deny`
-ALFRESCO_EXPLORER  | Habilita un [explorador d'arxius](#explorador) | `true` / `false` 
+ALFRESCO_EXPLORER  | Habilita un [explorador d'arxius](#explorador) | `true` / `false`  (per defecte `false`)
+ALFRESCO_VERIFY_SSL  | Habilita la verificación del SSL del servidor | `true` / `false`  (per defecte `false`)
 
 
 
