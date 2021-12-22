@@ -19,17 +19,17 @@ Pots configurar el paquet a través de l'arxiu `.env` de l'aplicació. Aquests s
 Paràmetre |  Descripció  | Valors
 --- | --- | --- 
 ALFRESCO_URL | Url base de la API  | `http://ip_or_domain:port/alfresco/`
-ALFRESCO_API | Api type | `rest` / `cmis` 
-ALFRESCO_API_VERSION  | Codi de versió | `1.0` (rest) / `1.1` (cmis)
+ALFRESCO_API | Api type | `rest` / <ins>`cmis`</ins> 
+ALFRESCO_API_VERSION  | Codi de versió | `1.0` (rest) / <ins>`1.1`</ins> (cmis)
 ALFRESCO_REPOSITORY_ID  | ID del repositori | `-default-` per defecte
 ALFRESCO_BASE_ID  | ID alfresco del directori base |  
 ALFRESCO_BASE_PATH  | Path del directori base |  
 ALFRESCO_USER  | Usuari |  
 ALFRESCO_PASSWORD  | Password | --- 
-ALFRESCO_DEBUG  | Mode debug (habilita més logs) | `true` / `false`
-ALFRESCO_REPEATED_POLICY  | Política a seguir en cas de pujar un arxiu repetit | `rename` / `overwrite` / `deny`
-ALFRESCO_EXPLORER  | Habilita un [explorador d'arxius](#explorador) | `true` / `false`  (per defecte `false`)
-ALFRESCO_VERIFY_SSL  | Habilita la verificación del SSL del servidor | `true` / `false`  (per defecte `false`)
+ALFRESCO_DEBUG  | Mode debug (habilita més logs) | `true` / <ins>`false`</ins>
+ALFRESCO_REPEATED_POLICY  | Política a seguir en cas de pujar un arxiu repetit | <ins>`rename`</ins> / `overwrite` / `deny`
+ALFRESCO_EXPLORER  | Habilita un [explorador d'arxius](#explorador) | `true` / <ins>`false`</ins> 
+ALFRESCO_VERIFY_SSL  | Habilita la verificación del SSL del servidor | `true` / <ins>`false`</ins>  
 
 
 
