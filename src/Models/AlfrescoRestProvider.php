@@ -101,9 +101,7 @@ class AlfrescoRestProvider
 
 		$this->client = new Client([
 			'base_uri' => $apiurl,
-			// 'request' => [
-			// 	'http_errors' => false
-			// ]
+			'verify' =>false
 		]);
 	}
 
@@ -188,6 +186,7 @@ class AlfrescoRestProvider
 
 		    Log::error("Error connecting to Alfresco server");
 			Log::error($e->getMessage());
+			dd($e);
 			throw new AlfrescoConnectionException(__("Error connecting to Alfresco server"));
 		}
 		
