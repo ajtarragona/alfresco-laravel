@@ -3,6 +3,11 @@
 # Alfresco Client for Laravel
 Access client to the Alfresco APIs (Rest and CMIS)
 
+<a href="https://packagist.org/packages/ajtarragona/alfresco-laravel"><img src="https://poser.pugx.org/ajtarragona/alfresco-laravel/d/total.svg" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/ajtarragona/alfresco-laravel"><img src="https://poser.pugx.org/ajtarragona/alfresco-laravel/v/stable.svg" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/ajtarragona/alfresco-laravel"><img src="https://poser.pugx.org/ajtarragona/alfresco-laravel/license.svg" alt="License"></a>
+
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
