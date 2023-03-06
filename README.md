@@ -3,9 +3,11 @@
 # Alfresco Client for Laravel
 Access client to the Alfresco APIs (Rest and CMIS)
 
-<a href="https://packagist.org/packages/ajtarragona/alfresco-laravel"><img src="https://poser.pugx.org/ajtarragona/alfresco-laravel/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/ajtarragona/alfresco-laravel"><img src="https://poser.pugx.org/ajtarragona/alfresco-laravel/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/ajtarragona/alfresco-laravel"><img src="https://poser.pugx.org/ajtarragona/alfresco-laravel/license.svg" alt="License"></a>
+[![Latest Stable Version](http://poser.pugx.org/ajtarragona/alfresco-laravel/v)](https://packagist.org/packages/ajtarragona/alfresco-laravel) 
+[![Total Downloads](http://poser.pugx.org/ajtarragona/alfresco-laravel/downloads)](https://packagist.org/packages/ajtarragona/alfresco-laravel) 
+[![Latest Unstable Version](http://poser.pugx.org/ajtarragona/alfresco-laravel/v/unstable)](https://packagist.org/packages/ajtarragona/alfresco-laravel) 
+[![License](http://poser.pugx.org/ajtarragona/alfresco-laravel/license)](https://packagist.org/packages/ajtarragona/alfresco-laravel) 
+[![PHP Version Require](http://poser.pugx.org/ajtarragona/alfresco-laravel/require/php)](https://packagist.org/packages/ajtarragona/alfresco-laravel)
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
