@@ -24,6 +24,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ConnectException;
 use Log;
 use Exception;
+use Illuminate\Support\Str;
 
 class AlfrescoRestProvider
 {
@@ -381,7 +382,7 @@ class AlfrescoRestProvider
 
 			if($archives){
 				foreach($archives as $archive){
-					$archivepath=str_replace($obj->path."/","",$archive->path);
+					$archivepath=Str::replace($obj->path."/","",$archive->path);
 					//_dump($archivepath);
 					$content= $this->getDocumentContent($archive->id);
 					$zip->FileAdd($archivepath, $content, TbsZip::TBSZIP_STRING);
@@ -536,7 +537,7 @@ class AlfrescoRestProvider
 	private function doCreateFolder($folderName, $parentfolder){ // throws AlfrescoObjectNotFoundException, AlfrescoObjectAlreadyExistsException{
 		//dump("doCreateFolder");
 
-			if(str_contains($folderName,"/")){
+			if(Str::contains($folderName,"/")){
 				$path_parts = pathinfo($folderName);
 				$relativePath = AlfrescoHelper::sanitizeDir($path_parts['dirname']);
 				$folderName = AlfrescoHelper::sanitizeName($path_parts['basename']);

@@ -2,6 +2,7 @@
 namespace Ajtarragona\AlfrescoLaravel\Models;
 use Ajtarragona\AlfrescoLaravel\Models\AlfrescoObject;
 use Ajtarragona\AlfrescoLaravel\Models\Helpers\AlfrescoHelper;
+use Illuminate\Support\Str;
 
 class AlfrescoDocument extends AlfrescoObject {
 	
@@ -127,7 +128,7 @@ class AlfrescoDocument extends AlfrescoObject {
 		$parent=$provider->getParent($doc->id);
 		$parentpath=$parent->fullpath;
 
-		//$path=str_replace($parentpath);
+		//$path=Str::replace($parentpath);
 		//$doc->fullpath = $cmisfolder->prop("path");
 		
 		$doc->fullpath = $parentpath."/".$doc->name;//$cmisdocument->prop("path");

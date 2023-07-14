@@ -22,7 +22,7 @@ use Ajtarragona\AlfrescoLaravel\Exceptions\AlfrescoConnectionException;
 use Ajtarragona\AlfrescoLaravel\Exceptions\AlfrescoObjectNotFoundException;
 use Ajtarragona\AlfrescoLaravel\Exceptions\AlfrescoObjectAlreadyExistsException;
 use Ajtarragona\AlfrescoLaravel\Models\Helpers\AlfrescoHelper;
-
+use Illuminate\Support\Str;
 use Log;
 use Exception;
 
@@ -346,7 +346,7 @@ class AlfrescoCmisProvider
 
 				if($archives){
 					foreach($archives as $archive){
-						$archivepath=str_replace($obj->path."/","",$archive->path);
+						$archivepath=Str::replace($obj->path."/","",$archive->path);
 						//_dump($archivepath);
 						$content=$this->session->getContentStream($archive->id);
 						$zip->FileAdd($archivepath, $content, TbsZip::TBSZIP_STRING);
@@ -493,7 +493,7 @@ class AlfrescoCmisProvider
 		try{
 			//dd("ALFRESCO: createFolder(".$folderName.") in folder " . $parentfolder->id);
 			
-    		if(str_contains($folderName,"/")){
+    		if(Str::contains($folderName,"/")){
     			//si tiene subdirectorios
 
     			$path=explode("/", $folderName);
@@ -1077,7 +1077,7 @@ class AlfrescoCmisProvider
 			$base=$this->getBaseFolder();
 			$folderId=$base->id;
 		}
-		$query = str_replace("'", "''", $query);
+		$query = Str::replace("'", "''", $query);
 
 		$parent=$this->getFolder($folderId);
 

@@ -17,8 +17,6 @@
     "require": {
         "php" : ">=7.0.0",
         "guzzlehttp/guzzle": "~6.0",
-        "laravel/helpers": "^1.0"
-
     },
     "autoload": {
         "psr-4": {

@@ -11,6 +11,7 @@ use Ajtarragona\AlfrescoLaravel\Models\Vendor\Cmis\Exceptions\CmisNotSupportedEx
 use Ajtarragona\AlfrescoLaravel\Models\Vendor\Cmis\Exceptions\CmisConstraintException;
 use Ajtarragona\AlfrescoLaravel\Models\Vendor\Cmis\Exceptions\CmisRuntimeException;
 use Ajtarragona\AlfrescoLaravel\Models\Vendor\Cmis\Exceptions\CmisNotImplementedException;
+use Illuminate\Support\Str;
 
 
 class CmisRepositoryWrapper
@@ -313,7 +314,7 @@ class CmisRepositoryWrapper
         {
             foreach ($values as $name => $value)
             {
-                $retval = str_replace("{" . $name . "}", $value, $retval);
+                $retval = Str::replace("{" . $name . "}", $value, $retval);
             }
         }
         // Fill in any unpoupated variables with ""
