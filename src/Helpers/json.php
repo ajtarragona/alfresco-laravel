@@ -25,3 +25,10 @@ if (! function_exists('to_array')) {
 	 	return json_decode(json_encode($object), true);
 	}
 }
+
+
+if (! function_exists('json_pretty')) {
+	function json_pretty($string) {
+	 	return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+	}
+}

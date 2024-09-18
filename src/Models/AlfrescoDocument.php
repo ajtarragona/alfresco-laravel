@@ -14,6 +14,8 @@ class AlfrescoDocument extends AlfrescoObject {
 	public $size;
 	public $humansize;
 
+	
+
 	// public $version;
 	// public $author;
 	// public $title;

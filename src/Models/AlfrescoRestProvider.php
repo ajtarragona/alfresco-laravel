@@ -46,6 +46,7 @@ class AlfrescoRestProvider
 	protected $rootpath;
 	protected $basepath;
 	protected $alfrescourl;
+	protected $api;
 	protected $apiuser;
 	protected $apipwd;
 	protected $apiversion;
@@ -55,8 +56,9 @@ class AlfrescoRestProvider
 	protected $session;
 	protected $debug;
 	protected $verify_ssl;
-
-
+	protected $baseid;	
+	protected $client;	
+	
 	
 
 	public function __construct($settings=false) { 
@@ -944,7 +946,9 @@ class AlfrescoRestProvider
 
 	
 	public function getPath($path){
-		return ltrim(substr( $path , strlen($this->rootpath)),"/");
+		$start=$this->rootpath?strlen($this->rootpath):0;
+
+		return ltrim(substr( $path , $start ),"/");
 	}
 	
 	

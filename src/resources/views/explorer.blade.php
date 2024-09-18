@@ -16,7 +16,7 @@
 
 @section('actions')
 	
-		@badge API: @badge(['type'=>'dark']) {{ strtoupper(config('alfresco.api'))}} @endbadge @endbadge
+		<span class="badge text-bg-dark">API: {{ strtoupper(config('alfresco.api'))}} </span>
 		@include('alfresco::parts.folder-actions')
 		@include('alfresco::parts.table-actions')
 
@@ -26,10 +26,7 @@
 
 
 @section('body')
-		{{-- @dump($breadcrumb) --}}
-
-		{{-- @dump($folder) --}}
-
+		
 		<div class="pt-3">
 				
 			@if($children)
@@ -38,6 +35,7 @@
 			@else
 					<p class="lead">@lang("El directori <strong>:name</strong> està buit",["name"=>$folder->name])</p>
 					@if(!$folder->isBaseFolder())
+						
 						@button(['href'=> route('alfresco.explorer',[$folder->getParent()->path]),'style'=>'light','size'=>'sm'])
 							@icon('angle-left') @lang("Tornar enrera")
 						@endbutton

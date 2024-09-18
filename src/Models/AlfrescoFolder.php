@@ -7,7 +7,8 @@ class AlfrescoFolder extends AlfrescoObject{
 	
 	//private $cmisfolder;
 	//private $provider;
-	
+	protected $description;	
+
 	public function cmisfolder($newcmisfolder = null)
     {
          static $cmisfolder;
@@ -223,7 +224,7 @@ class AlfrescoFolder extends AlfrescoObject{
 	
 
 	/**
-	 * Retorna el número d'arxius que conté aquesta carpeta. Opcionalment podem recòrrer recursivament totes les carpetes filles (pot ser lent).
+	 * Retorna el nï¿½mero d'arxius que contï¿½ aquesta carpeta. Opcionalment podem recï¿½rrer recursivament totes les carpetes filles (pot ser lent).
 	 * @param recursive
 	 * @return
 	 */
@@ -248,7 +249,7 @@ class AlfrescoFolder extends AlfrescoObject{
 
 
 	/**
-	 * Retorna la suma de la mida dels arxius que conté aquesta carpeta. Opcionalment podem recòrrer recursivament totes les carpetes filles (pot ser lent).
+	 * Retorna la suma de la mida dels arxius que contï¿½ aquesta carpeta. Opcionalment podem recï¿½rrer recursivament totes les carpetes filles (pot ser lent).
 	 * @param recursive
 	 * @return
 	 */

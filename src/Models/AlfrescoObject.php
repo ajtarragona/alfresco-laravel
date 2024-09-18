@@ -3,22 +3,24 @@ namespace Ajtarragona\AlfrescoLaravel\Models;
 use Ajtarragona\AlfrescoLaravel\Models\Helpers\AlfrescoHelper;
 use Ajtarragona\AlfrescoLaravel\Models\AlfrescoCmisProvider;
 use Ajtarragona\AlfrescoLaravel\Models\AlfrescoRestProvider;
+use Illuminate\Support\Arr;
 
 abstract class AlfrescoObject {
 	
 	public $id;
-	public $name;
-	public $path;
-	public $fullpath;
 	public $type;
+	public $name;
+	public $createdBy;
+	public $updatedBy;
 	public $parentId;
+	public $fullpath;
+	public $path;
 	public $created;
 	public $updated;
 	public $downloadurl;
+	public $viewurl;
+	public $encoding;
 	
-	
-	public $createdBy;
-	public $updatedBy;
 
 	public $properties;
 		//public $description;
@@ -98,7 +100,7 @@ abstract class AlfrescoObject {
 				//dump($name);
 				$ret[]=[
 					"path"=>implode("/",$crumbs),
-					"name"=>array_last($crumbs)
+					"name"=>Arr::last($crumbs)
 				];
 				array_pop($crumbs);
 			}

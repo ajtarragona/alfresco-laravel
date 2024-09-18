@@ -10,7 +10,7 @@
 	<td width="10%"  > {{ $file->humansize }}</td>
 	<td width="20%" ><span class="text-muted"  title="{{ $file->mimetype }}">{{ $file->mimetypedescription }}</span></td>
 	<td width="10%"><span class="text-muted">{{ $folder->updatedBy }}</span></td>
-	<td width="10%"><span class="text-muted text-nowrap">{{ datetimeformat(_date($file->updated)) }}</span></td>
+	<td width="10%"><span class="text-muted text-nowrap">{{ $file->updated }}</span></td>
 	<td class="text-right row-actions">
 		@buttongroup
 			{{-- 	<a class="btn btn-xs btn-info" href="{{ route('alfresco.info',[$file->id]) }}">
