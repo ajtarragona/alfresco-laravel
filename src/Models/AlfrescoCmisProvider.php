@@ -60,14 +60,14 @@ class AlfrescoCmisProvider
 		}
 		
 		$this->rootpath=$settings->base_path;
-		if(!ends_with($this->rootpath,"/")) $this->rootpath.="/";
+		if(!Str::endsWith($this->rootpath,"/")) $this->rootpath.="/";
 		
 		
 
 		$this->basepath= "";
 
 		$this->alfrescourl = $settings->url;
-		if(!ends_with($this->alfrescourl,"/")) $this->alfrescourl.="/";
+		if(!Str::endsWith($this->alfrescourl,"/")) $this->alfrescourl.="/";
 
 		$this->apiuser = $settings->user;
 		$this->apipwd = $settings->pass;
@@ -119,7 +119,7 @@ class AlfrescoCmisProvider
 		
 		//_dump($object->path);
 		//_dump($this->getBasepath(true));
-		if(!starts_with($object->path, $this->getBasepath(true))){ 
+		if(!Str::startsWith($object->path, $this->getBasepath(true))){ 
 			return true;
 		}else {
 			throw new AlfrescoObjectNotFoundException(__("Object :name doesn't belong to the current site",["name"=>$object->id]));
@@ -146,7 +146,7 @@ class AlfrescoCmisProvider
 	 */
 	public function setBasepath($path){
 		$this->basepath=$path;
-		if(!ends_with($this->basepath,"/")) $this->basepath.="/";
+		if(!Str::endsWith($this->basepath,"/")) $this->basepath.="/";
 	}
 
 
@@ -857,7 +857,7 @@ class AlfrescoCmisProvider
 			$target=$obj->getParent();
 			
 			if($obj->isDocument()){
-				if(!ends_with($newName,".".$obj->extension)) $newName.=".".$obj->extension;
+				if(!Str::endsWith($newName,".".$obj->extension)) $newName.=".".$obj->extension;
 
 				$contents=$this->session->getContentStream($obj->id);
 				

@@ -67,14 +67,14 @@ class AlfrescoRestProvider
 		}
 		
 		// $this->rootpath=$settings->base_path;
-		// if(!ends_with($this->rootpath,"/")) $this->rootpath.="/";
+		// if(!Str::endsWith($this->rootpath,"/")) $this->rootpath.="/";
 		
 		$this->baseid=$settings->base_id;
 
 		$this->basepath= "";
 
 		$this->alfrescourl = $settings->url;
-		if(!ends_with($this->alfrescourl,"/")) $this->alfrescourl.="/";
+		if(!Str::endsWith($this->alfrescourl,"/")) $this->alfrescourl.="/";
 
 		$this->apiuser = $settings->user;
 		$this->apipwd = $settings->pass;
@@ -156,7 +156,7 @@ class AlfrescoRestProvider
 			}
 
 			return $ret;
-		} catch (RequestException | ConnectException | ClientException $e) {
+		} catch (RequestException | ClientException $e) {
 		    //dd($e->getMessage());
 		    
 		    if ($e->hasResponse()) {
@@ -197,7 +197,7 @@ class AlfrescoRestProvider
 
 
 	// private function checkInBaseFolder($object){
-	// 	if(!starts_with($object->path, $this->getBasepath(true))){ 
+	// 	if(!Str::startsWith($object->path, $this->getBasepath(true))){ 
 	// 		return true;
 	// 	}else {
 	// 		throw new AlfrescoObjectNotFoundException(__("Object :name doesn't belong to the current site",["name"=>$object->id]));
@@ -230,7 +230,7 @@ class AlfrescoRestProvider
 	 */
 	public function setBasepath($path){
 		$this->basepath=$path;
-		if(!ends_with($this->basepath,"/")) $this->basepath.="/";
+		if(!Str::endsWith($this->basepath,"/")) $this->basepath.="/";
 	}
 
 
@@ -777,7 +777,7 @@ class AlfrescoRestProvider
 		$newName=AlfrescoHelper::sanitizeName($newName);
 
 		if($obj->isDocument() && $obj->extension){
-			if(!ends_with($newName,".".$obj->extension)) $newName.=".".$obj->extension;
+			if(!Str::endsWith($newName,".".$obj->extension)) $newName.=".".$obj->extension;
 		}
 		
 		$return=$this->call('PUT','nodes/'.$obj->id, [

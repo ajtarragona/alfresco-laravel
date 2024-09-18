@@ -1,7 +1,9 @@
 <?php
 
-Route::group(['prefix' => 'ajtarragona/alfresco','middleware' => ['alfresco-explorer','web','language']	], function () {
-	
+Route::group(['prefix' => 'ajtarragona/alfresco','middleware' => ['alfresco-explorer','web']	], function () {
+
+	Route::get('/', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@explorer')->name("alfresco.home");
+
 	Route::get('dir/{folder?}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@explorer')->name("alfresco.explorer")->where('folder', '(.*)');
 
 	Route::get('download/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@download')->name("alfresco.download");
