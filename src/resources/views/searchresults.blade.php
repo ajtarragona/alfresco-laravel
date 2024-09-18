@@ -1,4 +1,4 @@
-@extends('ajtarragona-web-components::layout/master-sidebar')
+@extends('alfresco::layout')
 
 @section('title')
 	@lang('Alfresco search results')

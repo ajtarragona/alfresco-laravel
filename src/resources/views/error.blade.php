@@ -1,4 +1,4 @@
-@extends('ajtarragona-web-components::layout/master')
+@extends('alfresco::layout')
 
 @section('title')
 	@lang('Alfresco Error')
