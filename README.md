@@ -141,7 +141,7 @@ Funció | Descripció | Paràmetres | Retorn | Excepcions
 ## Explorador d'arxius
 Si habilitem  el paràmetre: 
 ```
-ALFRESCO_DEBUG = true 
+ALFRESCO_EXPLORER = true 
 ```
 a l'arxiu `.env`, podem accedir a un *file-explorer* a la ruta: 
 `/ajtarragona/alfresco`
