@@ -1,17 +1,19 @@
 <?php
 
+Route::group(['prefix' => 'ajtarragona/alfresco','middleware' => ['web']	], function () {
+	Route::get('download/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@download')->name("alfresco.download");
+	Route::get('view/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@viewDocument')->name("alfresco.view");
+	Route::get('preview/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@previewDocument')->name("alfresco.preview");
+});
+
+
 Route::group(['prefix' => 'ajtarragona/alfresco','middleware' => ['alfresco-explorer','web']	], function () {
 
 	Route::get('/', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@explorer')->name("alfresco.home");
 
 	Route::get('dir/{folder?}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@explorer')->name("alfresco.explorer")->where('folder', '(.*)');
 
-	Route::get('download/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@download')->name("alfresco.download");
-
-	Route::get('view/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@viewDocument')->name("alfresco.view");
 	
-	Route::get('preview/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@previewDocument')->name("alfresco.preview");
-
 
 	Route::delete('delete/{id}', 'Ajtarragona\AlfrescoLaravel\Controllers\AlfrescoLaravelController@delete')->name("alfresco.delete");
 	
