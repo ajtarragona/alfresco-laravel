@@ -669,7 +669,7 @@ class AlfrescoCmisProvider
 				return $ret->numItems==-1;
 			}
 		}catch(CmisPermissionDeniedException |CmisRuntimeException $e){
-			dd($e);
+			//dd($e);
 			return false;
 		}
 
