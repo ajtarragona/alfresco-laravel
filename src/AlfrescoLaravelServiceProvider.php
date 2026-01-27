@@ -3,7 +3,11 @@
 namespace Ajtarragona\AlfrescoLaravel;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Filesystem\FilesystemAdapter as LaravelFilesystemAdapter;
+use League\Flysystem\Filesystem as Flysystem;
+use Illuminate\Support\Facades\Storage;
 use Ajtarragona\AlfrescoLaravel\Models\AlfrescoService;
+use Ajtarragona\AlfrescoLaravel\AlfrescoAdapter;
 
 class AlfrescoLaravelServiceProvider extends ServiceProvider
 {
@@ -21,7 +25,24 @@ class AlfrescoLaravelServiceProvider extends ServiceProvider
         
         $this->bootConfig();
 
+        $this->registerDiskAdapter();
 
+
+    }
+
+    protected function registerDiskAdapter()
+    {
+
+        Storage::extend('alfresco', function ($app, $config) {
+            $service = new AlfrescoService($config);
+            $adapter = new AlfrescoAdapter($service);
+
+            return new LaravelFilesystemAdapter(
+                new Flysystem($adapter, $config),
+                $adapter,
+                $config
+            );
+        });
     }
 
     /**
@@ -66,3 +87,4 @@ class AlfrescoLaravelServiceProvider extends ServiceProvider
         }
     }
 }
+

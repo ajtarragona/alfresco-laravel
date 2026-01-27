@@ -17,7 +17,7 @@ class AlfrescoService
 	protected $provider;
 
 
-	public function __construct($settings=false) { 
+	public function __construct( $settings=false) { 
 
 		if(!$settings) $settings=config('alfresco');
 		$settings=to_object($settings);
@@ -35,7 +35,7 @@ class AlfrescoService
 	 * Retorna el directori arrel des del qual s'executaran els altres mètodes 
 	 * @return String
 	 */
-	public function getBasepath($full=false){
+	public function getBasepath( $full=false){
 		return $this->provider->getBasepath($full);
 	}
 	
@@ -44,7 +44,7 @@ class AlfrescoService
 	 * Defineix el directori arrel des del qual s'executaran els altres mètodes.
 	 * @param basepath
 	 */
-	public function setBasepath($path){
+	public function setBasepath( $path){
 		$this->provider->setBasepath($path);
 	}
 
