@@ -52,9 +52,9 @@ class AlfrescoFolder extends AlfrescoObject{
 		$f->updatedBy = $folder->modifiedByUser->id;
 		
 
-		$f->parentId = $folder->parentId;
+		$f->parentId = property_exists($folder, 'parentId') ? $folder->parentId : null;
 		
-		$f->fullpath = $folder->path->name."/".$f->name;
+		$f->fullpath = property_exists($folder->path, 'name') ? $folder->path->name."/".$f->name : '/';
 		$f->path = $provider->getPath($f->fullpath);
 
 		
