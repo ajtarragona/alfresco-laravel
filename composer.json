@@ -1,6 +1,10 @@
 {
     "name": "ajtarragona/alfresco-laravel",
-    "keywords" : ["laravel5","laravel","alfresco"],
+    "keywords": [
+        "laravel5",
+        "laravel",
+        "alfresco"
+    ],
     "license": "MIT",
     "description": "Integration of Alfresco in Laravel",
     "authors": [
@@ -16,7 +20,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": "^8.2",
-        "illuminate/support": "^9.0|^10.0|^11.0|^12.0",
+        "illuminate/support": "^9.0|^10.0|^11.0|^12.0|^13.0",
         "league/flysystem": "^3.0",
         "league/flysystem-azure-blob-storage": "^3.0",
         "guzzlehttp/guzzle": ">=6.0"
@@ -32,8 +36,7 @@
                 "Ajtarragona\\AlfrescoLaravel\\AlfrescoLaravelServiceProvider"
             ],
             "aliases": {
-                "Alfresco" : "Ajtarragona\\AlfrescoLaravel\\Facades\\Alfresco"
-        
+                "Alfresco": "Ajtarragona\\AlfrescoLaravel\\Facades\\Alfresco"
             }
         }
     }
